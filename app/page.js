@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { TimePicker } from "antd";
+import { TimePicker, Tooltip } from "antd";
 import Background from "./Background";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState("");
@@ -52,7 +53,7 @@ export default function Home() {
         <div>
           <h1 className="text-3xl font-bold">{currentTime}</h1>
         </div>
-        <div>
+        <div className="flex items-center gap-4">
           <TimePicker
             showSecond={false}
             format={"HH:mm"}
@@ -63,6 +64,12 @@ export default function Home() {
             }}
             onChange={(time, timeString) => calculateRemainingTime(timeString)}
           />
+
+          <div>
+            <Tooltip title="Enter the hours you have completed" color="black">
+              <QuestionCircleOutlined />
+            </Tooltip>
+          </div>
         </div>
         {/* <div>
           <h1 className="text-2xl font-bold">
