@@ -6,15 +6,15 @@ import { TimePicker } from "antd";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState("");
-  const [completedTime, setCompletedTime] = useState("");
   const [remainingTime, setRemainingTime] = useState("");
+  const [completionTime, setCompletionTime] = useState("");
 
   const workTimeInMinutes = 8 * 60 + 15; // Total minutes for 8 hours 15 minutes
 
   useEffect(() => {
     // Update the time every second
     const intervalId = setInterval(() => {
-      setCurrentTime(dayjs().format("HH:mm:ss"));
+      setCurrentTime(dayjs().format("hh:mm:ss a"));
     }, 1000);
 
     return () => clearInterval(intervalId);
@@ -22,34 +22,61 @@ export default function Home() {
 
   const calculateRemainingTime = (timeString) => {
     if (timeString) {
-      const [hours, minutes] = timeString.split(":");
-      const completedTimeInMinutes = parseInt(hours) * 60 + parseInt(minutes);
+      const current = dayjs();
+      const completed = dayjs(timeString, "HH:mm");
+
+      const completedTimeInMinutes = completed.hour() * 60 + completed.minute();
       const remaining = workTimeInMinutes - completedTimeInMinutes;
 
-      const remainingHours = Math.floor(remaining / 60);
-      const remainingMinutes = remaining % 60;
+      if (remaining >= 0) {
+        const remainingHours = Math.floor(remaining / 60);
+        const remainingMinutes = remaining % 60;
 
-      setRemainingTime(`${remainingHours} hours ${remainingMinutes} minutes`);
+        setRemainingTime(`${remainingHours} hours ${remainingMinutes} minutes`);
+
+        const completion = current
+          .add(remainingHours, "hour")
+          .add(remainingMinutes, "minute");
+        setCompletionTime(completion.format("hh:mm:ss A"));
+      } else {
+        setRemainingTime("Work completed!");
+        setCompletionTime("");
+      }
     }
   };
 
   return (
     <>
-      <div className="flex flex-col h-screen justify-center items-center gap-4">
+      <div className="flex flex-col h-screen justify-center items-center gap-14 font-mono">
         <div>
           <h1 className="text-3xl font-bold">{currentTime}</h1>
         </div>
         <div>
           <TimePicker
             showSecond={false}
+            format={"HH:mm"}
+            showNow={false}
+            placeholder="Select Completed Time"
+            style={{
+              width: 200,
+            }}
             onChange={(time, timeString) => calculateRemainingTime(timeString)}
           />
         </div>
-        <div>
-          <h1 className="text-3xl font-bold">
+        {/* <div>
+          <h1 className="text-2xl font-bold">
             Remaining Time: {remainingTime}
           </h1>
-        </div>
+        </div> */}
+        {completionTime && (
+          <div>
+            <h1 className="text-2xl font-bold">
+              You can go 🏠 at: {completionTime}
+            </h1>
+          </div>
+        )}
+
+        <div className="absolute bottom-6">Developer with ❤️‍🔥 by Faizan</div>
       </div>
     </>
   );
