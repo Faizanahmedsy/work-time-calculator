@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { TimePicker } from "antd";
+import Background from "./Background";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState("");
@@ -46,8 +47,8 @@ export default function Home() {
   };
 
   return (
-    <>
-      <div className="flex flex-col h-screen justify-center items-center gap-14 font-mono">
+    <Background>
+      <div className="flex flex-col h-screen justify-center items-center relative z-10 font-mono gap-14">
         <div>
           <h1 className="text-3xl font-bold">{currentTime}</h1>
         </div>
@@ -78,6 +79,6 @@ export default function Home() {
 
         <div className="absolute bottom-6">Developed with ❤️‍🔥 by Faizan</div>
       </div>
-    </>
+    </Background>
   );
 }
