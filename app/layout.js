@@ -6,7 +6,7 @@ import AntProvider from "@/components/AntProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Work Time Tracker",
+  title: "Work Watch",
   description: "Made by Faizanahmed",
 };
 
