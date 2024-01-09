@@ -79,7 +79,7 @@ export default function Home() {
         {completionTime && (
           <div>
             <h1 className="text-2xl font-bold">
-              You can go 🏠 at: {completionTime}
+              Work Time Completes at: {completionTime}
             </h1>
           </div>
         )}
