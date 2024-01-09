@@ -39,7 +39,7 @@ export default function Home() {
         const completion = current
           .add(remainingHours, "hour")
           .add(remainingMinutes, "minute");
-        setCompletionTime(completion.format("hh:mm:ss A"));
+        setCompletionTime(completion.format("hh:mm A"));
       } else {
         setRemainingTime("Work completed!");
         setCompletionTime("");
