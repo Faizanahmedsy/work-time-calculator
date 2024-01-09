@@ -76,7 +76,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="absolute bottom-6">Developer with ❤️‍🔥 by Faizan</div>
+        <div className="absolute bottom-6">Developed with ❤️‍🔥 by Faizan</div>
       </div>
     </>
   );
