@@ -58,7 +58,7 @@ export default function Home() {
             showSecond={false}
             format={"HH:mm"}
             showNow={false}
-            placeholder="Select Completed Time"
+            placeholder="Enter Completed Hours"
             style={{
               width: 200,
             }}
