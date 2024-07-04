@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { TimePicker, InputNumber, Tooltip } from "antd";
 import Background from "./Background";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState("");
@@ -40,11 +41,12 @@ export default function Home() {
 
   return (
     <Background>
-      <div className="flex flex-col h-screen justify-center items-center relative z-10 font-mono gap-14">
+      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-14">
         <div>
           <h1 className="text-3xl font-bold">{currentTime}</h1>
         </div>
         <div className="flex items-center gap-4 flex-col">
+          <div className="font-bold">When did you come to office?</div>
           <TimePicker
             showSecond={false}
             format={"HH:mm"}
@@ -55,6 +57,9 @@ export default function Home() {
             }}
             onChange={(time, timeString) => setArrivalTime(timeString)}
           />
+          <div className="font-bold">
+            How many minutes did you took the break?
+          </div>
 
           <InputNumber
             min={0}
@@ -65,15 +70,6 @@ export default function Home() {
             }}
             onChange={(value) => setBreakMinutes(value)}
           />
-
-          <div>
-            <Tooltip
-              title="Enter your arrival time and total break minutes"
-              color="black"
-            >
-              <QuestionCircleOutlined />
-            </Tooltip>
-          </div>
         </div>
 
         {completionTime && (
@@ -84,7 +80,24 @@ export default function Home() {
           </div>
         )}
 
-        <div className="absolute bottom-6">Developed with ❤️‍🔥 by Faizan</div>
+        <div className="absolute bottom-6">
+          Developed with ❤️‍🔥 by{" "}
+          <Link
+            href="https://faizansaiyed.vercel.app/v-2"
+            className="font-bold"
+            target="_blank"
+          >
+            Faizan
+          </Link>
+        </div>
+      </div>
+      <div className="absolute bottom-6 left-10 text-zinc-500">
+        <Link
+          href="https://github.com/Faizanahmedsy/work-time-calculator"
+          target="_blank"
+        >
+          Give a Star on Github
+        </Link>
       </div>
     </Background>
   );
