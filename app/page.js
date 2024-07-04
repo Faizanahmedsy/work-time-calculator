@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { TimePicker, Tooltip } from "antd";
+import { TimePicker, InputNumber, Tooltip } from "antd";
 import Background from "./Background";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState("");
-  const [remainingTime, setRemainingTime] = useState("");
   const [completionTime, setCompletionTime] = useState("");
+  const [arrivalTime, setArrivalTime] = useState(null);
+  const [breakMinutes, setBreakMinutes] = useState(null);
 
   const workTimeInMinutes = 8 * 60 + 15; // Total minutes for 8 hours 15 minutes
 
@@ -22,28 +23,18 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const calculateRemainingTime = (timeString) => {
-    if (timeString) {
-      const current = dayjs();
-      const completed = dayjs(timeString, "HH:mm");
+  useEffect(() => {
+    if (arrivalTime && breakMinutes !== null) {
+      calculateCompletionTime();
+    }
+  }, [arrivalTime, breakMinutes]);
 
-      const completedTimeInMinutes = completed.hour() * 60 + completed.minute();
-      const remaining = workTimeInMinutes - completedTimeInMinutes;
-
-      if (remaining >= 0) {
-        const remainingHours = Math.floor(remaining / 60);
-        const remainingMinutes = remaining % 60;
-
-        setRemainingTime(`${remainingHours} hours ${remainingMinutes} minutes`);
-
-        const completion = current
-          .add(remainingHours, "hour")
-          .add(remainingMinutes, "minute");
-        setCompletionTime(completion.format("hh:mm A"));
-      } else {
-        setRemainingTime("Work completed!");
-        setCompletionTime("");
-      }
+  const calculateCompletionTime = () => {
+    if (arrivalTime && breakMinutes !== null) {
+      const start = dayjs(arrivalTime, "HH:mm");
+      const adjustedWorkTimeInMinutes = workTimeInMinutes + breakMinutes;
+      const completion = start.add(adjustedWorkTimeInMinutes, "minute");
+      setCompletionTime(completion.format("hh:mm A"));
     }
   };
 
@@ -53,29 +44,38 @@ export default function Home() {
         <div>
           <h1 className="text-3xl font-bold">{currentTime}</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-col">
           <TimePicker
             showSecond={false}
             format={"HH:mm"}
             showNow={false}
-            placeholder="Enter Completed Hours"
+            placeholder="Enter Arrival Time"
             style={{
               width: 200,
             }}
-            onChange={(time, timeString) => calculateRemainingTime(timeString)}
+            onChange={(time, timeString) => setArrivalTime(timeString)}
+          />
+
+          <InputNumber
+            min={0}
+            max={480}
+            placeholder="Break Minutes"
+            style={{
+              width: 200,
+            }}
+            onChange={(value) => setBreakMinutes(value)}
           />
 
           <div>
-            <Tooltip title="Enter the hours you have completed" color="black">
+            <Tooltip
+              title="Enter your arrival time and total break minutes"
+              color="black"
+            >
               <QuestionCircleOutlined />
             </Tooltip>
           </div>
         </div>
-        {/* <div>
-          <h1 className="text-2xl font-bold">
-            Remaining Time: {remainingTime}
-          </h1>
-        </div> */}
+
         {completionTime && (
           <div>
             <h1 className="text-2xl font-bold">
