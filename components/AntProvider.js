@@ -1,9 +1,13 @@
 "use client";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, theme } from "antd";
 import React from "react";
 
 const AntProvider = ({ children }) => {
+  // Create a client
+  const queryClient = new QueryClient();
+
   const { defaultAlgorithm, darkAlgorithm } = theme;
   return (
     <ConfigProvider
@@ -11,7 +15,7 @@ const AntProvider = ({ children }) => {
         algorithm: darkAlgorithm,
       }}
     >
-      {children}
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </ConfigProvider>
   );
 };
