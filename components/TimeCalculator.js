@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { InputNumber } from "antd";
 import dayjs from "dayjs";
-import { TimePicker, InputNumber, Tooltip } from "antd";
-import Background from "./Background";
-import { QuestionCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import Background from "./Background";
+import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [completionTime, setCompletionTime] = useState("");
-  const [arrivalTime, setArrivalTime] = useState(null);
+  const [arrivalTime, setArrivalTime] = useState(undefined); // Adjusted to match TimePickerDemo
   const [breakMinutes, setBreakMinutes] = useState(null);
   const [timeCompleted, setTimeCompleted] = useState(null);
 
@@ -19,8 +19,7 @@ function TimeCalculator() {
   useEffect(() => {
     // Update the time every second
     const intervalId = setInterval(() => {
-      const now = dayjs();
-      setCurrentTime(now);
+      setCurrentTime(dayjs());
     }, 1000);
 
     return () => clearInterval(intervalId);
@@ -35,17 +34,19 @@ function TimeCalculator() {
 
   const calculateCompletionTime = () => {
     if (arrivalTime && breakMinutes !== null) {
-      const start = dayjs(arrivalTime, "HH:mm");
       const adjustedWorkTimeInMinutes = workTimeInMinutes + breakMinutes;
-      const completion = start.add(adjustedWorkTimeInMinutes, "minute");
+      const completion = dayjs(arrivalTime).add(
+        adjustedWorkTimeInMinutes,
+        "minute"
+      );
       setCompletionTime(completion.format("hh:mm A"));
     }
   };
 
   const calculateTimeCompleted = () => {
     if (arrivalTime && breakMinutes !== null) {
-      const start = dayjs(arrivalTime, "HH:mm");
-      const elapsedMinutes = currentTime.diff(start, "minute") - breakMinutes;
+      const elapsedMinutes =
+        currentTime.diff(arrivalTime, "minute") - breakMinutes;
 
       if (elapsedMinutes <= 0) {
         setTimeCompleted("0 hours 0 minutes");
@@ -66,46 +67,33 @@ function TimeCalculator() {
           </h1>
         </div>
         <div className="flex flex-col gap-5">
-          <div className="flex   gap-4">
+          <div className="flex gap-4">
             <div className="font-bold w-full">When did you come to office?</div>
-            <TimePicker
-              showSecond={false}
-              format={"HH:mm"}
-              showNow={false}
-              placeholder="Enter Arrival Time"
-              style={{
-                width: "100%",
-              }}
-              onChange={(time, timeString) => setArrivalTime(timeString)}
+            <TimePickerDemo
+              date={arrivalTime}
+              setDate={setArrivalTime} // Handles the arrival time state
             />
           </div>
-          <div className="flex   gap-4">
-            {/* <div className="flex justify-center items-center gap-4"></div> */}
-            {/* <div className="flex justify-center items-center gap-4"> */}
+          <div className="flex gap-4">
             <div className="font-bold w-full">
               How many minutes did you take for break?
             </div>
-
             <InputNumber
               min={0}
               max={480}
               placeholder="Break Minutes"
-              style={{
-                width: "100%",
-              }}
+              style={{ width: "100%" }}
               onChange={(value) => setBreakMinutes(value)}
             />
           </div>
         </div>
-
-        {/* </div> */}
 
         {completionTime && timeCompleted && (
           <div>
             <h1 className="text-2xl text-center font-bold">
               Work Time Completes at: {completionTime}
             </h1>
-            <h3 className="text-md  text-center font-semibold text-zinc-500">
+            <h3 className="text-md text-center font-semibold text-zinc-500">
               Total work time you have completed till now: {timeCompleted}
             </h3>
           </div>
