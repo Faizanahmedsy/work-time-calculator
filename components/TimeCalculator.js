@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
+import AnimatedTimeDisplay from "./AnimatedTime";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
@@ -61,17 +62,41 @@ function TimeCalculator() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
+
   return (
     <Background>
       <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-14">
         <div>
           <h1 className="text-6xl font-bold">
-            {currentTime.format("hh:mm:ss a")}
+            {/* {currentTime.format("hh:mm:ss a")} */}
+            <AnimatedTimeDisplay currentTime={currentTime} />
           </h1>
         </div>
         <div className="flex flex-col gap-5">
           <div className="flex gap-4 justify-center items-center">
-            <div className="font-bold w-full">
+            <div className="font-medium w-full">
               At what time did you come to the office?
             </div>
             <TimePickerDemo
@@ -81,7 +106,7 @@ function TimeCalculator() {
             />
           </div>
           <div className="flex gap-4 justify-center items-center">
-            <div className="font-bold w-full">How long was your break?</div>
+            <div className="font-medium w-full">How long was your break?</div>
             <TimePickerDemo
               date={breakDuration}
               setDate={setBreakDuration}

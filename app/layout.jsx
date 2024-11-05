@@ -1,8 +1,8 @@
 import AntProvider from "@/components/AntProvider";
-import { Inter } from "next/font/google";
+import { Inter, Nunito_Sans, Outfit, Work_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Outfit({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Work Watch",
