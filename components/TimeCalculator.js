@@ -1,11 +1,11 @@
 "use client";
 
-import { InputNumber } from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
+import { Input } from "./ui/input";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
@@ -67,23 +67,23 @@ function TimeCalculator() {
           </h1>
         </div>
         <div className="flex flex-col gap-5">
-          <div className="flex gap-4">
-            <div className="font-bold w-full">When did you come to office?</div>
+          <div className="flex gap-4 justify-center items-center">
+            <div className="font-bold w-full">
+              At what did you come to office?
+            </div>
             <TimePickerDemo
               date={arrivalTime}
               setDate={setArrivalTime} // Handles the arrival time state
             />
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 justify-center items-center">
             <div className="font-bold w-full">
               How many minutes did you take for break?
             </div>
-            <InputNumber
-              min={0}
-              max={480}
-              placeholder="Break Minutes"
-              style={{ width: "100%" }}
+            <Input
+              placeholder="Minutes"
               onChange={(value) => setBreakMinutes(value)}
+              className="w-24"
             />
           </div>
         </div>
