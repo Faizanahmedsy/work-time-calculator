@@ -5,35 +5,36 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
-import { Input } from "./ui/input";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [completionTime, setCompletionTime] = useState("");
-  const [arrivalTime, setArrivalTime] = useState(undefined); // Adjusted to match TimePickerDemo
-  const [breakMinutes, setBreakMinutes] = useState(null);
+  const [arrivalTime, setArrivalTime] = useState(undefined);
+  const [breakDuration, setBreakDuration] = useState(
+    new Date(0, 0, 0, 0, 0, 0)
+  );
   const [timeCompleted, setTimeCompleted] = useState(null);
 
-  const workTimeInMinutes = 8 * 60 + 15; // Total minutes for 8 hours 15 minutes
+  const workTimeInMinutes = 8 * 60 + 15; // 8 hours 15 minutes
 
   useEffect(() => {
-    // Update the time every second
     const intervalId = setInterval(() => {
       setCurrentTime(dayjs());
     }, 1000);
-
     return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
-    if (arrivalTime && breakMinutes !== null) {
+    if (arrivalTime) {
       calculateCompletionTime();
       calculateTimeCompleted();
     }
-  }, [arrivalTime, breakMinutes, currentTime]);
+  }, [arrivalTime, breakDuration, currentTime]);
 
   const calculateCompletionTime = () => {
-    if (arrivalTime && breakMinutes !== null) {
+    if (arrivalTime && breakDuration) {
+      const breakMinutes =
+        breakDuration.getHours() * 60 + breakDuration.getMinutes();
       const adjustedWorkTimeInMinutes = workTimeInMinutes + breakMinutes;
       const completion = dayjs(arrivalTime).add(
         adjustedWorkTimeInMinutes,
@@ -44,7 +45,9 @@ function TimeCalculator() {
   };
 
   const calculateTimeCompleted = () => {
-    if (arrivalTime && breakMinutes !== null) {
+    if (arrivalTime && breakDuration) {
+      const breakMinutes =
+        breakDuration.getHours() * 60 + breakDuration.getMinutes();
       const elapsedMinutes =
         currentTime.diff(arrivalTime, "minute") - breakMinutes;
 
@@ -69,21 +72,21 @@ function TimeCalculator() {
         <div className="flex flex-col gap-5">
           <div className="flex gap-4 justify-center items-center">
             <div className="font-bold w-full">
-              At what did you come to office?
+              At what time did you come to the office?
             </div>
             <TimePickerDemo
               date={arrivalTime}
-              setDate={setArrivalTime} // Handles the arrival time state
+              setDate={setArrivalTime}
+              showSeconds={false} // Show only hours and minutes
             />
           </div>
           <div className="flex gap-4 justify-center items-center">
-            <div className="font-bold w-full">
-              How many minutes did you take for break?
-            </div>
-            <Input
-              placeholder="Minutes"
-              onChange={(value) => setBreakMinutes(value)}
-              className="w-24"
+            <div className="font-bold w-full">How long was your break?</div>
+            <TimePickerDemo
+              date={breakDuration}
+              setDate={setBreakDuration}
+              showMinutes={true} // Show hours and minutes only
+              showSeconds={false} // Hide seconds
             />
           </div>
         </div>
