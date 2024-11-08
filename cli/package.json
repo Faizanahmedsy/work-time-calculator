@@ -1,0 +1,13 @@
+{
+  "name": "react-component-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for creating React components and pages",
+  "main": "react-cli.js",
+  "bin": {
+    "create-react-component": "./react-cli.js"
+  },
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
+  }
+} 

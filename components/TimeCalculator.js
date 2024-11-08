@@ -2,7 +2,7 @@
 
 import dayjs from "dayjs";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 import AnimatedTimeDisplay from "./AnimatedTime";
@@ -25,14 +25,9 @@ function TimeCalculator() {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    if (arrivalTime) {
-      calculateCompletionTime();
-      calculateTimeCompleted();
-    }
-  }, [arrivalTime, breakDuration, currentTime]);
 
-  const calculateCompletionTime = () => {
+
+  const calculateCompletionTime = useCallback(() => {
     if (arrivalTime && breakDuration) {
       const breakMinutes =
         breakDuration.getHours() * 60 + breakDuration.getMinutes();
@@ -43,9 +38,9 @@ function TimeCalculator() {
       );
       setCompletionTime(completion.format("hh:mm A"));
     }
-  };
+  }, [arrivalTime, breakDuration, workTimeInMinutes]);
 
-  const calculateTimeCompleted = () => {
+  const calculateTimeCompleted = useCallback(() => {
     if (arrivalTime && breakDuration) {
       const breakMinutes =
         breakDuration.getHours() * 60 + breakDuration.getMinutes();
@@ -60,7 +55,14 @@ function TimeCalculator() {
         setTimeCompleted(`${completedHours} hours ${completedMinutes} minutes`);
       }
     }
-  };
+  }, [arrivalTime, breakDuration, currentTime]);
+
+    useEffect(() => {
+    if (arrivalTime) {
+      calculateCompletionTime();
+      calculateTimeCompleted();
+    }
+  }, [arrivalTime, breakDuration, calculateCompletionTime, calculateTimeCompleted, currentTime]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
