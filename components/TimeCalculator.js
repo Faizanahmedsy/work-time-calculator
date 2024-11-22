@@ -1,19 +1,17 @@
 "use client";
-
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 import AnimatedTimeDisplay from "./AnimatedTime";
+import { ScrollArea } from "./ui/scroll-area";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [completionTime, setCompletionTime] = useState("");
   const [arrivalTime, setArrivalTime] = useState(undefined);
-  const [breakDuration, setBreakDuration] = useState(
-    new Date(0, 0, 0, 0, 0, 0)
-  );
+  const [breaks, setBreaks] = useState([]);
   const [timeCompleted, setTimeCompleted] = useState(null);
 
   const workTimeInMinutes = 8 * 60 + 15; // 8 hours 15 minutes
@@ -25,27 +23,56 @@ function TimeCalculator() {
     return () => clearInterval(intervalId);
   }, []);
 
+  const addBreak = () => {
+    setBreaks([
+      ...breaks,
+      {
+        id: Date.now(),
+        duration: new Date(0, 0, 0, 0, 0, 0),
+      },
+    ]);
+  };
 
+  const updateBreak = (id, newBreakDuration) => {
+    const updatedBreaks = breaks.map((breakItem) =>
+      breakItem.id === id
+        ? { ...breakItem, duration: newBreakDuration }
+        : breakItem
+    );
+    setBreaks(updatedBreaks);
+  };
+
+  const removeBreak = (id) => {
+    const updatedBreaks = breaks.filter((breakItem) => breakItem.id !== id);
+    setBreaks(updatedBreaks);
+  };
+
+  const calculateTotalBreakMinutes = useCallback(() => {
+    return breaks.reduce((total, breakItem) => {
+      return (
+        total +
+        (breakItem.duration.getHours() * 60 + breakItem.duration.getMinutes())
+      );
+    }, 0);
+  }, [breaks]);
 
   const calculateCompletionTime = useCallback(() => {
-    if (arrivalTime && breakDuration) {
-      const breakMinutes =
-        breakDuration.getHours() * 60 + breakDuration.getMinutes();
-      const adjustedWorkTimeInMinutes = workTimeInMinutes + breakMinutes;
+    if (arrivalTime) {
+      const totalBreakMinutes = calculateTotalBreakMinutes();
+      const adjustedWorkTimeInMinutes = workTimeInMinutes + totalBreakMinutes;
       const completion = dayjs(arrivalTime).add(
         adjustedWorkTimeInMinutes,
         "minute"
       );
       setCompletionTime(completion.format("hh:mm A"));
     }
-  }, [arrivalTime, breakDuration, workTimeInMinutes]);
+  }, [arrivalTime, calculateTotalBreakMinutes, workTimeInMinutes]);
 
   const calculateTimeCompleted = useCallback(() => {
-    if (arrivalTime && breakDuration) {
-      const breakMinutes =
-        breakDuration.getHours() * 60 + breakDuration.getMinutes();
+    if (arrivalTime) {
+      const totalBreakMinutes = calculateTotalBreakMinutes();
       const elapsedMinutes =
-        currentTime.diff(arrivalTime, "minute") - breakMinutes;
+        currentTime.diff(arrivalTime, "minute") - totalBreakMinutes;
 
       if (elapsedMinutes <= 0) {
         setTimeCompleted("0 hours 0 minutes");
@@ -55,66 +82,80 @@ function TimeCalculator() {
         setTimeCompleted(`${completedHours} hours ${completedMinutes} minutes`);
       }
     }
-  }, [arrivalTime, breakDuration, currentTime]);
+  }, [arrivalTime, calculateTotalBreakMinutes, currentTime]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (arrivalTime) {
       calculateCompletionTime();
       calculateTimeCompleted();
     }
-  }, [arrivalTime, breakDuration, calculateCompletionTime, calculateTimeCompleted, currentTime]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24,
-      },
-    },
-  };
+  }, [
+    arrivalTime,
+    breaks,
+    calculateCompletionTime,
+    calculateTimeCompleted,
+    currentTime,
+  ]);
 
   return (
     <Background>
-      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-14">
+      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10">
         <div>
           <h1 className="text-6xl font-bold">
-            {/* {currentTime.format("hh:mm:ss a")} */}
             <AnimatedTimeDisplay currentTime={currentTime} />
           </h1>
         </div>
-        <div className="flex flex-col gap-5">
-          <div className="flex gap-4 justify-center items-center">
-            <div className="font-medium w-full">
+        <div className="flex flex-col gap-6 w-full max-w-2xl">
+          <div className="flex gap-4 justify-between items-center">
+            <div className="font-medium">
               At what time did you come to the office?
             </div>
             <TimePickerDemo
               date={arrivalTime}
               setDate={setArrivalTime}
-              showSeconds={false} // Show only hours and minutes
+              showSeconds={false}
             />
           </div>
-          <div className="flex gap-4 justify-center items-center">
-            <div className="font-medium w-full">How long was your break?</div>
-            <TimePickerDemo
-              date={breakDuration}
-              setDate={setBreakDuration}
-              showMinutes={true} // Show hours and minutes only
-              showSeconds={false} // Hide seconds
-            />
+          <div className="space-y-4">
+            {breaks.length > 0 && (
+              <ScrollArea className="h-64 w-full rounded-md border p-4">
+                <div className="space-y-3">
+                  {breaks.map((breakItem, index) => (
+                    <div
+                      key={breakItem.id}
+                      className="flex items-center gap-3 bg-gray-900 p-3 rounded-lg"
+                    >
+                      <span className="text-sm font-medium">
+                        Break {index + 1}
+                      </span>
+                      <TimePickerDemo
+                        date={breakItem.duration}
+                        setDate={(newBreakDuration) =>
+                          updateBreak(breakItem.id, newBreakDuration)
+                        }
+                        showMinutes={true}
+                        showSeconds={false}
+                      />
+                      <button
+                        onClick={() => removeBreak(breakItem.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={addBreak}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Add Break
+              </button>
+            </div>
           </div>
         </div>
 

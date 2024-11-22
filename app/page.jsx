@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const TimeCalculator = dynamic(() => import("..//components/TimeCalculator"), {
+const TimeCalculator = dynamic(() => import("../components/TimeCalculator"), {
   ssr: false,
 });
 
