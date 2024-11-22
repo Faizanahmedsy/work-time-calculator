@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import confetti from "canvas-confetti";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 import AnimatedTimeDisplay from "./AnimatedTime";
@@ -18,6 +19,26 @@ function TimeCalculator() {
   const [timeCompleted, setTimeCompleted] = useState(null);
 
   const workTimeInMinutes = 8 * 60 + 15; // 8 hours 15 minutes
+
+  // const scalar = 2;
+  // var timer = confetti.shapeFromText({ text: "⌛", scalar });
+  // const watches = confetti.shapeFromText({ text: "⌚", scalar });
+  // const faizan = confetti.shapeFromText({ text: "faizan", scalar });
+  const triggerConfetti = () => {
+    confetti({
+      // shapes: [watches, timer, faizan],
+      // scalar: 2,
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"],
+      duration: 3000,
+    });
+
+    setTimeout(() => {
+      confetti.reset();
+    }, 7000);
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -85,7 +106,24 @@ function TimeCalculator() {
       } else {
         const completedHours = Math.floor(elapsedMinutes / 60);
         const completedMinutes = elapsedMinutes % 60;
-        setTimeCompleted(`${completedHours} hours ${completedMinutes} minutes`);
+        const timeCompletedText = `${completedHours} hours ${completedMinutes} minutes`;
+        setTimeCompleted(timeCompletedText);
+
+        console.log("firstBreak", firstBreak);
+        const firstBreakMinutes =
+          firstBreak.getHours() * 60 + firstBreak.getMinutes();
+
+        console.log("firstBreakMinutes", firstBreakMinutes);
+
+        // Trigger confetti when work hours are completed
+        if (
+          completedHours >= 8 &&
+          completedMinutes >= 15 &&
+          firstBreakMinutes > 0 &&
+          breaks.length == 0
+        ) {
+          triggerConfetti();
+        }
       }
     }
   }, [arrivalTime, calculateTotalBreakMinutes, currentTime]);
@@ -171,12 +209,7 @@ function TimeCalculator() {
             )}
 
             <div className="flex justify-end">
-              <Button
-                onClick={addBreak}
-                // className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 transition-colors duration-200"
-              >
-                Add Break
-              </Button>
+              <Button onClick={addBreak}>Add Break</Button>
             </div>
           </div>
         </div>
