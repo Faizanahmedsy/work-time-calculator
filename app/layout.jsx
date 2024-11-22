@@ -1,8 +1,7 @@
 import AntProvider from "@/components/AntProvider";
-import { Inter, Nunito_Sans, Outfit, Work_Sans } from "next/font/google";
-import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { Toaster } from "@/components/ui/toaster";
+import { Outfit } from "next/font/google";
+import "./globals.css";
 
 const inter = Outfit({ subsets: ["latin"] });
 
@@ -20,7 +19,6 @@ export default function RootLayout({ children }) {
             <Navbar />
             {children}
           </main>
-          <Toaster />
         </AntProvider>
       </body>
     </html>

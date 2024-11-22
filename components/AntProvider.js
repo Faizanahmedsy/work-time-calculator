@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, theme } from "antd";
 import React from "react";
+import { Toaster } from "./ui/toaster";
 
 //This is the configuration for the antd library
 const AntProvider = ({ children }) => {
@@ -17,6 +18,7 @@ const AntProvider = ({ children }) => {
       }}
     >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <Toaster />
     </ConfigProvider>
   );
 };

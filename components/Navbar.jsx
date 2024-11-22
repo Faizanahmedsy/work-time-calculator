@@ -1,4 +1,6 @@
 "use client";
+import { Arrow } from "@radix-ui/react-dropdown-menu";
+import { ArrowRight, SquareArrowOutUpRight, Unlink2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -55,6 +57,14 @@ export default function Navbar() {
         <div className="flex items-center gap-8">
           <NavLink href="/">Timer</NavLink>
           <NavLink href="/todo">Todo</NavLink>
+          <Link
+            href="https://kitty-kit.vercel.app/"
+            className="bg-slate-900   text-slate-300 rounded-full px-4 py-1 text-sm font-semibold flex justify-center items-center"
+            target="_blank"
+          >
+            Kitty
+            <SquareArrowOutUpRight className="h-4 w-4 ml-2" />
+          </Link>
         </div>
       </div>
     </nav>

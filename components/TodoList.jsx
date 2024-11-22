@@ -36,6 +36,8 @@ export function TodoList() {
   } = useTodoStore();
   const [newTodo, setNewTodo] = useState("");
   const [editTodo, setEditTodo] = useState({ id: "", title: "" });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleAddTodo = (e) => {
@@ -49,6 +51,12 @@ export function TodoList() {
     if (!editTodo.title.trim()) return;
     updateTodo(editTodo.id, editTodo.title);
     setEditTodo({ id: "", title: "" });
+    setIsEditDialogOpen(false); // Close the edit dialog
+  };
+
+  const handleDeleteTodo = (id) => {
+    deleteTodo(id);
+    setIsDeleteDialogOpen(false); // Close the delete dialog
   };
 
   const generateEODReport = () => {
@@ -140,7 +148,10 @@ export function TodoList() {
               </div>
 
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Dialog>
+                <Dialog
+                  open={isEditDialogOpen}
+                  onOpenChange={setIsEditDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
@@ -183,7 +194,10 @@ export function TodoList() {
                   </DialogContent>
                 </Dialog>
 
-                <AlertDialog>
+                <AlertDialog
+                  open={isDeleteDialogOpen}
+                  onOpenChange={setIsDeleteDialogOpen}
+                >
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="ghost"
@@ -208,7 +222,7 @@ export function TodoList() {
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => deleteTodo(todo.id)}
+                        onClick={() => handleDeleteTodo(todo.id)}
                         className="bg-red-600 hover:bg-red-700 text-white"
                       >
                         Delete
