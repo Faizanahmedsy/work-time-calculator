@@ -160,7 +160,7 @@ function TimeCalculator() {
             <TimePickerDemo
               date={arrivalTime}
               setDate={setArrivalTime}
-              showSeconds={false}
+              showSeconds={true}
             />
           </div>
 
@@ -170,7 +170,7 @@ function TimeCalculator() {
               date={firstBreak}
               setDate={setFirstBreak}
               showMinutes={true}
-              showSeconds={false}
+              showSeconds={true}
             />
           </div>
 
@@ -193,7 +193,7 @@ function TimeCalculator() {
                             updateBreak(breakItem.id, newBreakDuration)
                           }
                           showMinutes={true}
-                          showSeconds={false}
+                          showSeconds={true}
                         />
                         <button
                           onClick={() => removeBreak(breakItem.id)}
