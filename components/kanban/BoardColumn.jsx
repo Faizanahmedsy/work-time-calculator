@@ -5,12 +5,15 @@ import { CSS } from "@dnd-kit/utilities";
 import { useMemo } from "react";
 import { TaskCard } from "./TaskCard";
 import { cva } from "class-variance-authority";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Copy } from "lucide-react"; // Import Copy icon
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export function BoardColumn({ column, tasks, isOverlay }) {
+  const { toast } = useToast();
+
   const tasksIds = useMemo(() => {
     return tasks.map((task) => task.id);
   }, [tasks]);
@@ -51,6 +54,53 @@ export function BoardColumn({ column, tasks, isOverlay }) {
     }
   );
 
+  // Function to handle copying tasks to clipboard
+  const handleCopyTasks = (column) => {
+    console.log("column:", column);
+
+    if (column.id === "in-progress") {
+    } else if (column.id === "todo") {
+    } else if (column.id === "done") {
+    }
+
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const tasksList = tasks.map((task) => `- ${task.content}`).join("\n");
+
+    console.log("tasksList:", tasksList);
+
+    let textToCopy = `Tasks for ${column.title} - ${formattedDate}\n--------------------------\n${tasksList}`;
+
+    if (column.id === "in-progress") {
+    } else if (column.id === "todo") {
+      textToCopy = `TODO - ${formattedDate}\n--------------------------\n${tasksList}`;
+    } else if (column.id === "done") {
+      textToCopy = `EOD ${formattedDate}\n--------------------------\n${tasksList}`;
+    }
+
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        toast({
+          title: "Tasks copied to clipboard",
+          description: "You can now paste it anywhere",
+        });
+      })
+      .catch((error) => {
+        console.log("Error copying tasks:", error);
+        toast({
+          title: "Error copying tasks",
+          description: "Please try again",
+          status: "error",
+        });
+      });
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -70,6 +120,16 @@ export function BoardColumn({ column, tasks, isOverlay }) {
           <GripVertical />
         </Button>
         <span className="ml-auto"> {column.title}</span>
+        {/* Add Copy Button */}
+        <Button
+          variant={"ghost"}
+          size={"icon"}
+          onClick={() => handleCopyTasks(column)}
+          className="p-1 text-primary/50 hover:text-primary"
+          aria-label="Copy tasks"
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
       </CardHeader>
       <ScrollArea>
         <CardContent className="flex flex-grow flex-col gap-2 p-2">
