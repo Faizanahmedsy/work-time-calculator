@@ -17,89 +17,8 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { TaskCard } from "./TaskCard";
 import { hasDraggableData } from "./utils";
 import { coordinateGetter } from "./multipleContainersKeyboardPreset";
-
-const defaultCols = [
-  {
-    id: "todo",
-    title: "Todo",
-  },
-  {
-    id: "in-progress",
-    title: "In progress",
-  },
-  {
-    id: "done",
-    title: "Done",
-  },
-];
-
-const initialTasks = [
-  {
-    id: "task1",
-    columnId: "done",
-    content: "Project initiation and planning",
-  },
-  {
-    id: "task2",
-    columnId: "done",
-    content: "Gather requirements from stakeholders",
-  },
-  {
-    id: "task3",
-    columnId: "done",
-    content: "Create wireframes and mockups",
-  },
-  {
-    id: "task4",
-    columnId: "in-progress",
-    content: "Develop homepage layout",
-  },
-  {
-    id: "task5",
-    columnId: "in-progress",
-    content: "Design color scheme and typography",
-  },
-  {
-    id: "task6",
-    columnId: "todo",
-    content: "Implement user authentication",
-  },
-  {
-    id: "task7",
-    columnId: "todo",
-    content: "Build contact us page",
-  },
-  {
-    id: "task8",
-    columnId: "todo",
-    content: "Create product catalog",
-  },
-  {
-    id: "task9",
-    columnId: "todo",
-    content: "Develop about us page",
-  },
-  {
-    id: "task10",
-    columnId: "todo",
-    content: "Optimize website for mobile devices",
-  },
-  {
-    id: "task11",
-    columnId: "todo",
-    content: "Integrate payment gateway",
-  },
-  {
-    id: "task12",
-    columnId: "todo",
-    content: "Perform testing and bug fixing",
-  },
-  {
-    id: "task13",
-    columnId: "todo",
-    content: "Launch website and deploy to server",
-  },
-];
+import { v4 as uuidv4 } from "uuid";
+import { defaultCols, initialTasks } from "./constants/kanban.constants";
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState(defaultCols);
@@ -130,6 +49,36 @@ export function KanbanBoard() {
       column,
     };
   }
+
+  // Function to add a new task to a column
+  const addTask = (columnId, content) => {
+    const newTask = {
+      id: uuidv4(), // Generate a unique ID for the new task
+      columnId,
+      content,
+    };
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+  };
+
+  // Function to delete a task by its ID
+  const deleteTask = (taskId) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  // Function to handle adding a task (example: add to the first column)
+  const handleAddTask = () => {
+    const newTaskContent = prompt("Enter the task content:");
+    if (newTaskContent) {
+      addTask("todo", newTaskContent); // Add to the "Todo" column
+    }
+  };
+
+  // Function to handle deleting a task
+  const handleDeleteTask = (taskId) => {
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      deleteTask(taskId);
+    }
+  };
 
   const announcements = {
     onDragStart({ active }) {
@@ -243,10 +192,29 @@ export function KanbanBoard() {
               key={col.id}
               column={col}
               tasks={tasks.filter((task) => task.columnId === col.id)}
+              onDeleteTask={handleDeleteTask}
             />
           ))}
         </SortableContext>
       </BoardContainer>
+
+      {/* Add Task Button */}
+      <button
+        onClick={handleAddTask}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Add Task
+      </button>
 
       {"document" in window &&
         createPortal(

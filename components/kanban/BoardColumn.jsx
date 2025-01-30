@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-export function BoardColumn({ column, tasks, isOverlay }) {
+export function BoardColumn({ column, tasks, isOverlay, onDeleteTask }) {
   const { toast } = useToast();
 
   const tasksIds = useMemo(() => {
@@ -135,7 +135,7 @@ export function BoardColumn({ column, tasks, isOverlay }) {
         <CardContent className="flex flex-grow flex-col gap-2 p-2">
           <SortableContext items={tasksIds}>
             {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onDeleteTask={onDeleteTask} />
             ))}
           </SortableContext>
         </CardContent>
