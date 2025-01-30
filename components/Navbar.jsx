@@ -56,8 +56,8 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-8">
           <NavLink href="/">Timer</NavLink>
-          <NavLink href="/todo">Todo</NavLink>
           <NavLink href="/kanban">Kanban</NavLink>
+          <NavLink href="/home">Home</NavLink>
 
           <Link
             href="https://kitty-kit.vercel.app/"
