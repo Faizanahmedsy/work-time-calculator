@@ -22,6 +22,8 @@ import { defaultCols, initialTasks } from "./constants/kanban.constants";
 import { Button } from "../ui/button";
 import { InteractiveHoverButton } from "../ui/interactive-hover-button";
 
+const TASKS_STORAGE_KEY = "kanban-tasks";
+
 export function KanbanBoard() {
   const [isClient, setIsClient] = useState(false);
 
@@ -29,7 +31,21 @@ export function KanbanBoard() {
   const pickedUpTaskColumn = useRef(null);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
-  const [tasks, setTasks] = useState(initialTasks);
+  // Load tasks from local storage on initial render
+  const [tasks, setTasks] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
+      return savedTasks ? JSON.parse(savedTasks) : initialTasks;
+    }
+    return initialTasks;
+  });
+
+  // Save tasks to local storage whenever they change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+    }
+  }, [tasks]);
 
   const [activeColumn, setActiveColumn] = useState(null);
 
