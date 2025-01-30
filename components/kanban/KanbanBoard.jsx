@@ -19,6 +19,8 @@ import { hasDraggableData } from "./utils";
 import { coordinateGetter } from "./multipleContainersKeyboardPreset";
 import { v4 as uuidv4 } from "uuid";
 import { defaultCols, initialTasks } from "./constants/kanban.constants";
+import { Button } from "../ui/button";
+import { InteractiveHoverButton } from "../ui/interactive-hover-button";
 
 export function KanbanBoard() {
   const [isClient, setIsClient] = useState(false);
@@ -209,22 +211,12 @@ export function KanbanBoard() {
       </BoardContainer>
 
       {/* Add Task Button */}
-      <button
+      <InteractiveHoverButton
         onClick={handleAddTask}
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
+        className="fixed bottom-4 right-4 px-4 py-2 bg-cyan-900  rounded-full"
       >
         Add Task
-      </button>
+      </InteractiveHoverButton>
 
       {"document" in window &&
         createPortal(
