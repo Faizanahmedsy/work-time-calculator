@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { BoardColumn, BoardContainer } from "./BoardColumn";
@@ -21,6 +21,8 @@ import { v4 as uuidv4 } from "uuid";
 import { defaultCols, initialTasks } from "./constants/kanban.constants";
 
 export function KanbanBoard() {
+  const [isClient, setIsClient] = useState(false);
+
   const [columns, setColumns] = useState(defaultCols);
   const pickedUpTaskColumn = useRef(null);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
@@ -174,6 +176,14 @@ export function KanbanBoard() {
       return `Dragging ${active.data.current?.type} cancelled.`;
     },
   };
+
+  useEffect(() => {
+    setIsClient(true); // Set to true only on the client side
+  }, []);
+
+  if (!isClient) {
+    return null; // Return nothing during SSR
+  }
 
   return (
     <DndContext
