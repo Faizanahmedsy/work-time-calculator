@@ -155,7 +155,8 @@ function TimeCalculator() {
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           <div className="flex gap-4 justify-between items-center">
             <div className="font-medium text-white">
-              At what time did you come to the office?
+              At what time did you come to the office?{" "}
+              <div className="text-xs opacity-80">(24-hour time format)</div>
             </div>
             <TimePickerDemo
               date={arrivalTime}
