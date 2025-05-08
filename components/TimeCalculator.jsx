@@ -9,6 +9,8 @@ import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 import AnimatedTimeDisplay from "./AnimatedTime";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
@@ -17,8 +19,12 @@ function TimeCalculator() {
   const [firstBreak, setFirstBreak] = useState(new Date(0, 0, 0, 0, 0, 0));
   const [breaks, setBreaks] = useState([]);
   const [timeCompleted, setTimeCompleted] = useState(null);
+  const [workMode, setWorkMode] = useState("full"); // "full" or "half"
 
-  const workTimeInMinutes = 8 * 60 + 15; // 8 hours 15 minutes
+  // Work time based on selected mode
+  const getWorkTimeInMinutes = () => {
+    return workMode === "full" ? 8 * 60 + 15 : 4 * 60 + 15; // 8h15m or 4h15m
+  };
 
   // const scalar = 2;
   // var timer = confetti.shapeFromText({ text: "⌛", scalar });
@@ -86,6 +92,7 @@ function TimeCalculator() {
   const calculateCompletionTime = useCallback(() => {
     if (arrivalTime) {
       const totalBreakMinutes = calculateTotalBreakMinutes();
+      const workTimeInMinutes = getWorkTimeInMinutes();
       const adjustedWorkTimeInMinutes = workTimeInMinutes + totalBreakMinutes;
       const completion = dayjs(arrivalTime).add(
         adjustedWorkTimeInMinutes,
@@ -93,7 +100,7 @@ function TimeCalculator() {
       );
       setCompletionTime(completion.format("hh:mm A"));
     }
-  }, [arrivalTime, calculateTotalBreakMinutes, workTimeInMinutes]);
+  }, [arrivalTime, calculateTotalBreakMinutes, workMode]);
 
   const calculateTimeCompleted = useCallback(() => {
     if (arrivalTime) {
@@ -112,13 +119,16 @@ function TimeCalculator() {
         console.log("firstBreak", firstBreak);
         const firstBreakMinutes =
           firstBreak.getHours() * 60 + firstBreak.getMinutes();
+        const workTimeInMinutes = getWorkTimeInMinutes();
+        const requiredHours = Math.floor(workTimeInMinutes / 60);
+        const requiredMinutes = workTimeInMinutes % 60;
 
         console.log("firstBreakMinutes", firstBreakMinutes);
 
         // Trigger confetti when work hours are completed
         if (
-          completedHours >= 8 &&
-          completedMinutes >= 15 &&
+          completedHours >= requiredHours &&
+          completedMinutes >= requiredMinutes &&
           firstBreakMinutes > 0 &&
           breaks.length == 0
         ) {
@@ -126,7 +136,7 @@ function TimeCalculator() {
         }
       }
     }
-  }, [arrivalTime, calculateTotalBreakMinutes, currentTime]);
+  }, [arrivalTime, calculateTotalBreakMinutes, currentTime, workMode]);
 
   useEffect(() => {
     if (arrivalTime) {
@@ -140,6 +150,7 @@ function TimeCalculator() {
     calculateCompletionTime,
     calculateTimeCompleted,
     currentTime,
+    workMode,
   ]);
 
   return (
@@ -153,6 +164,30 @@ function TimeCalculator() {
           </div>
         )}
         <div className="flex flex-col gap-6 w-full max-w-2xl">
+          {/* Work Mode Selection */}
+          <div className="flex gap-4 justify-between items-center">
+            <div className="font-medium text-white">Work Mode</div>
+            <RadioGroup
+              defaultValue="full"
+              value={workMode}
+              onValueChange={setWorkMode}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="full" id="full" />
+                <Label htmlFor="full" className="text-white">
+                  Full Day (8h 15m)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="half" id="half" />
+                <Label htmlFor="half" className="text-white">
+                  Half Day (4h 15m)
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="flex gap-4 justify-between items-center">
             <div className="font-medium text-white">
               At what time did you come to the office?{" "}
@@ -177,7 +212,7 @@ function TimeCalculator() {
 
           <div className="space-y-4">
             {breaks.length > 0 && (
-              <ScrollArea className="h-64 w-full rounded-2xl  p-4 bg-transparent backdrop-blur-sm">
+              <ScrollArea className="h-64 w-full rounded-2xl p-4 bg-transparent backdrop-blur-sm">
                 <div className="space-y-3">
                   {breaks.map((breakItem, index) => (
                     <div
