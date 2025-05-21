@@ -40,6 +40,9 @@ export function KanbanBoard() {
     return initialTasks;
   });
 
+  // State for confirmation modal
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+
   // Save tasks to local storage whenever they change
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -83,6 +86,12 @@ export function KanbanBoard() {
   // Function to delete a task by its ID
   const deleteTask = (taskId) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  // Function to delete all tasks
+  const deleteAllTasks = () => {
+    setTasks([]);
+    setShowDeleteAllModal(false);
   };
 
   // Function to handle adding a task (example: add to the first column)
@@ -204,53 +213,92 @@ export function KanbanBoard() {
   }
 
   return (
-    <DndContext
-      accessibility={{
-        announcements,
-      }}
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-    >
-      <BoardContainer>
-        <SortableContext items={columnsId}>
-          {columns.map((col) => (
-            <BoardColumn
-              key={col.id}
-              column={col}
-              tasks={tasks.filter((task) => task.columnId === col.id)}
-              onDeleteTask={handleDeleteTask}
-            />
-          ))}
-        </SortableContext>
-      </BoardContainer>
-
-      {/* Add Task Button */}
-      <InteractiveHoverButton
-        onClick={handleAddTask}
-        className="fixed bottom-4 right-4 px-4 py-2 bg-cyan-900  rounded-full"
+    <>
+      <DndContext
+        accessibility={{
+          announcements,
+        }}
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
       >
-        Add Task
-      </InteractiveHoverButton>
-
-      {"document" in window &&
-        createPortal(
-          <DragOverlay>
-            {activeColumn && (
+        <BoardContainer>
+          <SortableContext items={columnsId}>
+            {columns.map((col) => (
               <BoardColumn
-                isOverlay
-                column={activeColumn}
-                tasks={tasks.filter(
-                  (task) => task.columnId === activeColumn.id
-                )}
+                key={col.id}
+                column={col}
+                tasks={tasks.filter((task) => task.columnId === col.id)}
+                onDeleteTask={handleDeleteTask}
               />
-            )}
-            {activeTask && <TaskCard task={activeTask} isOverlay />}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+            ))}
+          </SortableContext>
+        </BoardContainer>
+
+        {/* Action Buttons */}
+        <div className="fixed bottom-4 right-4 flex space-x-2">
+          <InteractiveHoverButton
+            onClick={() => setShowDeleteAllModal(true)}
+            className="px-4 py-2 bg-red-600 rounded-full"
+          >
+            Delete All Tasks
+          </InteractiveHoverButton>
+          <InteractiveHoverButton
+            onClick={handleAddTask}
+            className="px-4 py-2 bg-cyan-900 rounded-full"
+          >
+            Add Task
+          </InteractiveHoverButton>
+        </div>
+
+        {"document" in window &&
+          createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <BoardColumn
+                  isOverlay
+                  column={activeColumn}
+                  tasks={tasks.filter(
+                    (task) => task.columnId === activeColumn.id
+                  )}
+                />
+              )}
+              {activeTask && <TaskCard task={activeTask} isOverlay />}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+
+      {/* Delete All Confirmation Modal */}
+      {showDeleteAllModal && (
+        <div className=" fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 text-black p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">
+              Confirm Delete All Tasks
+            </h3>
+            <p className="mb-6">
+              Are you sure you want to delete all tasks from all columns? This
+              action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                onClick={() => setShowDeleteAllModal(false)}
+                className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={deleteAllTasks}
+                className="bg-red-600 hover:bg-red-700 text-rose-100"
+              >
+                Delete All
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 
   function onDragStart(event) {
