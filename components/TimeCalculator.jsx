@@ -27,6 +27,7 @@ function TimeCalculator() {
   const [firstBreak, setFirstBreak] = useState(new Date(0, 0, 0, 0, 0, 0));
   const [breaks, setBreaks] = useState([]);
   const [timeCompleted, setTimeCompleted] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
   const [workMode, setWorkMode] = useState("full"); // "full" or "half"
   const [showSettings, setShowSettings] = useState(false);
 
@@ -127,30 +128,50 @@ function TimeCalculator() {
     halfDayMinutes,
   ]);
 
-  const calculateTimeCompleted = useCallback(() => {
+  const calculateTimeCompletedAndRemaining = useCallback(() => {
     if (arrivalTime) {
       const totalBreakMinutes = calculateTotalBreakMinutes();
       const elapsedMinutes =
         currentTime.diff(arrivalTime, "minute") - totalBreakMinutes;
+      const workTimeInMinutes = getWorkTimeInMinutes();
 
+      // Calculate time completed
       if (elapsedMinutes <= 0) {
         setTimeCompleted("0 hours 0 minutes");
+        setTimeRemaining(
+          `${Math.floor(workTimeInMinutes / 60)} hours ${
+            workTimeInMinutes % 60
+          } minutes`
+        );
       } else {
         const completedHours = Math.floor(elapsedMinutes / 60);
         const completedMinutes = elapsedMinutes % 60;
         const timeCompletedText = `${completedHours} hours ${completedMinutes} minutes`;
         setTimeCompleted(timeCompletedText);
 
+        // Calculate time remaining
+        const remainingMinutes = Math.max(
+          0,
+          workTimeInMinutes - elapsedMinutes
+        );
+        const remainingHours = Math.floor(remainingMinutes / 60);
+        const remainingMins = remainingMinutes % 60;
+        const timeRemainingText =
+          remainingMinutes > 0
+            ? `${remainingHours} hours ${remainingMins} minutes`
+            : "0 hours 0 minutes (Completed!)";
+        setTimeRemaining(timeRemainingText);
+
         const firstBreakMinutes =
           firstBreak.getHours() * 60 + firstBreak.getMinutes();
-        const workTimeInMinutes = getWorkTimeInMinutes();
         const requiredHours = Math.floor(workTimeInMinutes / 60);
         const requiredMinutes = workTimeInMinutes % 60;
 
         // Trigger confetti when work hours are completed
         if (
-          completedHours >= requiredHours &&
-          completedMinutes >= requiredMinutes &&
+          (completedHours > requiredHours ||
+            (completedHours === requiredHours &&
+              completedMinutes >= requiredMinutes)) &&
           firstBreakMinutes > 0 &&
           breaks.length == 0
         ) {
@@ -172,14 +193,14 @@ function TimeCalculator() {
   useEffect(() => {
     if (arrivalTime) {
       calculateCompletionTime();
-      calculateTimeCompleted();
+      calculateTimeCompletedAndRemaining();
     }
   }, [
     arrivalTime,
     firstBreak,
     breaks,
     calculateCompletionTime,
-    calculateTimeCompleted,
+    calculateTimeCompletedAndRemaining,
     currentTime,
     workMode,
     fullDayHours,
@@ -447,12 +468,15 @@ function TimeCalculator() {
         </div>
 
         {completionTime && timeCompleted && (
-          <div>
+          <div className="space-y-2">
             <h1 className="text-2xl text-center font-bold text-white">
               Work Time Completes at: {completionTime}
             </h1>
             <h3 className="text-md text-center font-semibold text-gray-400">
               Total work time you have completed till now: {timeCompleted}
+            </h3>
+            <h3 className="text-md text-center font-semibold text-green-400">
+              Remaining work time: {timeRemaining}
             </h3>
           </div>
         )}
