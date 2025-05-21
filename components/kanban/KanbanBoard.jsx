@@ -21,6 +21,24 @@ import { v4 as uuidv4 } from "uuid";
 import { defaultCols, initialTasks } from "./constants/kanban.constants";
 import { Button } from "../ui/button";
 import { InteractiveHoverButton } from "../ui/interactive-hover-button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
 
 const TASKS_STORAGE_KEY = "kanban-tasks";
 
@@ -42,6 +60,13 @@ export function KanbanBoard() {
 
   // State for confirmation modal
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+
+  // Task dialog state
+  const [showTaskDialog, setShowTaskDialog] = useState(false);
+  const [taskContent, setTaskContent] = useState("");
+  const [taskColumnId, setTaskColumnId] = useState("todo");
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const isEditing = !!editingTaskId;
 
   // Save tasks to local storage whenever they change
   useEffect(() => {
@@ -73,14 +98,49 @@ export function KanbanBoard() {
     };
   }
 
-  // Function to add a new task to a column
-  const addTask = (columnId, content) => {
-    const newTask = {
-      id: uuidv4(), // Generate a unique ID for the new task
-      columnId,
-      content,
-    };
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+  // Opens the add task dialog
+  const openAddTaskDialog = () => {
+    setTaskContent("");
+    setTaskColumnId("todo");
+    setEditingTaskId(null);
+    setShowTaskDialog(true);
+  };
+
+  // Opens edit task dialog and populates with existing task data
+  const openEditTaskDialog = (task) => {
+    setTaskContent(task.content);
+    setTaskColumnId(task.columnId);
+    setEditingTaskId(task.id);
+    setShowTaskDialog(true);
+  };
+
+  // Handles add/edit task submission
+  const handleTaskSubmit = () => {
+    if (!taskContent.trim()) return;
+
+    if (isEditing) {
+      // Edit existing task
+      setTasks(
+        tasks.map((task) =>
+          task.id === editingTaskId
+            ? { ...task, content: taskContent, columnId: taskColumnId }
+            : task
+        )
+      );
+    } else {
+      // Add new task
+      const newTask = {
+        id: uuidv4(),
+        columnId: taskColumnId,
+        content: taskContent,
+      };
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+    }
+
+    // Reset form and close dialog
+    setTaskContent("");
+    setEditingTaskId(null);
+    setShowTaskDialog(false);
   };
 
   // Function to delete a task by its ID
@@ -92,14 +152,6 @@ export function KanbanBoard() {
   const deleteAllTasks = () => {
     setTasks([]);
     setShowDeleteAllModal(false);
-  };
-
-  // Function to handle adding a task (example: add to the first column)
-  const handleAddTask = () => {
-    const newTaskContent = prompt("Enter the task content:");
-    if (newTaskContent) {
-      addTask("todo", newTaskContent); // Add to the "Todo" column
-    }
   };
 
   // Function to handle deleting a task
@@ -231,6 +283,7 @@ export function KanbanBoard() {
                 column={col}
                 tasks={tasks.filter((task) => task.columnId === col.id)}
                 onDeleteTask={handleDeleteTask}
+                onEditTask={(task) => openEditTaskDialog(task)}
               />
             ))}
           </SortableContext>
@@ -245,7 +298,7 @@ export function KanbanBoard() {
             Delete All Tasks
           </InteractiveHoverButton>
           <InteractiveHoverButton
-            onClick={handleAddTask}
+            onClick={openAddTaskDialog}
             className="px-4 py-2 bg-cyan-900 rounded-full"
           >
             Add Task
@@ -270,34 +323,100 @@ export function KanbanBoard() {
           )}
       </DndContext>
 
-      {/* Delete All Confirmation Modal */}
-      {showDeleteAllModal && (
-        <div className=" fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 text-black p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">
-              Confirm Delete All Tasks
-            </h3>
-            <p className="mb-6">
-              Are you sure you want to delete all tasks from all columns? This
-              action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-2">
-              <Button
-                onClick={() => setShowDeleteAllModal(false)}
-                className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={deleteAllTasks}
-                className="bg-red-600 hover:bg-red-700 text-rose-100"
-              >
-                Delete All
-              </Button>
+      {/* Add/Edit Task Dialog */}
+      <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
+        <DialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white">
+              {isEditing ? "Edit Task" : "Add New Task"}
+            </DialogTitle>
+            <DialogDescription>
+              {isEditing
+                ? "Make changes to your task below."
+                : "Enter the details for your new task below."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="task-content">Task Content</Label>
+              <Input
+                id="task-content"
+                value={taskContent}
+                onChange={(e) => setTaskContent(e.target.value)}
+                placeholder="Enter task description..."
+                className="col-span-3"
+                autoFocus
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="task-column">Column</Label>
+              <Select value={taskColumnId} onValueChange={setTaskColumnId}>
+                <SelectTrigger className="w-full" id="task-column">
+                  <SelectValue placeholder="Select a column" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {columns.map((col) => (
+                      <SelectItem key={col.id} value={col.id}>
+                        {col.title}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowTaskDialog(false)}
+              className="text-gray-300 border-gray-600 hover:bg-gray-700 rounded-full"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTaskSubmit}
+              className="bg-cyan-900 hover:bg-cyan-600 text-cyan-200 rounded-full"
+            >
+              {isEditing ? "Save Changes" : "Add Task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Confirmation Modal */}
+      <Dialog open={showDeleteAllModal} onOpenChange={setShowDeleteAllModal}>
+        <DialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white">
+              Confirm Delete All Tasks
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all tasks from all columns? This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteAllModal(false)}
+              className="text-gray-300 border-gray-600 hover:bg-gray-700 rounded-full py-0"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={deleteAllTasks}
+              className="bg-red-600 hover:bg-red-700 text-rose-100 rounded-full flex justify-center items-center py-0"
+            >
+              Delete All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
