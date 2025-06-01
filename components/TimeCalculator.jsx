@@ -31,7 +31,8 @@ import { ScratchToReveal } from "./magicui/scratch-to-reveal";
 function TimeCalculator() {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [completionTime, setCompletionTime] = useState("");
-  const [arrivalTime, setArrivalTime] = useState(undefined);
+  // Set default start time to 10:00 AM
+  const [arrivalTime, setArrivalTime] = useState(new Date(0, 0, 0, 10, 0, 0));
   const [estimatedEndTime, setEstimatedEndTime] = useState(undefined);
   const [firstBreak, setFirstBreak] = useState(new Date(0, 0, 0, 0, 0, 0));
   const [breaks, setBreaks] = useState([]);
@@ -353,7 +354,7 @@ function TimeCalculator() {
       <div className="flex min-h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10">
         {/* {breaks.length === 0 && ( */}
         <div className="min-h-[50dvh]">
-          <h1 className="text-xl font-bold flex justify-start">
+          <h1 className="text-xl font-bold flex justify-start select-none">
             <AnimatedTimeDisplay currentTime={currentTime} />
           </h1>
           <ScratchToReveal

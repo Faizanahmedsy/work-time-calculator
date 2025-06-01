@@ -6,7 +6,7 @@ import { TimePeriodSelect } from "./period-select";
 import { TimePickerInput } from "./time-picker-input";
 
 export function TimePicker12Demo({ date, setDate, showSeconds = true }) {
-  const [period, setPeriod] = useState("PM");
+  const [period, setPeriod] = useState("AM");
 
   const minuteRef = useRef(null);
   const hourRef = useRef(null);
