@@ -1,7 +1,7 @@
 "use client";
 import confetti from "canvas-confetti";
 import dayjs from "dayjs";
-import { Settings, X } from "lucide-react";
+import { Settings, X, Calculator } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AnimatedTimeDisplay from "./AnimatedTime";
@@ -43,6 +43,7 @@ function TimeCalculator() {
     useState("duration-based"); // "duration-based" or "time-based"
   const [showSettings, setShowSettings] = useState(false);
   const [workTimeStatus, setWorkTimeStatus] = useState(null); // For time-based variant
+  const [showResults, setShowResults] = useState(false); // New state to control results visibility
 
   // Default work times (in minutes)
   const defaultFullDayMinutes = 8 * 60 + 15; // 8h15m
@@ -285,18 +286,22 @@ function TimeCalculator() {
     calculationVariant,
   ]);
 
+  // Modified to only calculate when showResults is true and calculate button is clicked
   useEffect(() => {
-    if (calculationVariant === "duration-based" && arrivalTime) {
-      calculateCompletionTime();
-      calculateTimeCompletedAndRemaining();
-    } else if (
-      calculationVariant === "time-based" &&
-      arrivalTime &&
-      estimatedEndTime
-    ) {
-      calculateTimeBasedStatus();
+    if (showResults) {
+      if (calculationVariant === "duration-based" && arrivalTime) {
+        calculateCompletionTime();
+        calculateTimeCompletedAndRemaining();
+      } else if (
+        calculationVariant === "time-based" &&
+        arrivalTime &&
+        estimatedEndTime
+      ) {
+        calculateTimeBasedStatus();
+      }
     }
   }, [
+    showResults,
     arrivalTime,
     estimatedEndTime,
     firstBreak,
@@ -347,6 +352,21 @@ function TimeCalculator() {
     setTimeCompleted(null);
     setTimeRemaining(null);
     setWorkTimeStatus(null);
+    setShowResults(false); // Hide results when changing variant
+  };
+
+  // New function to handle calculate button click
+  const handleCalculate = () => {
+    setShowResults(true);
+  };
+
+  // Function to check if calculate button should be enabled
+  const isCalculateEnabled = () => {
+    if (calculationVariant === "duration-based") {
+      return arrivalTime !== null;
+    } else {
+      return arrivalTime !== null && estimatedEndTime !== null;
+    }
   };
 
   return (
@@ -655,57 +675,74 @@ function TimeCalculator() {
                 </ScrollArea>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex justify-between">
                 <Button onClick={addBreak} className="rounded-full">
                   Add Break
+                </Button>
+
+                {/* Calculate Button */}
+                <Button
+                  onClick={handleCalculate}
+                  disabled={!isCalculateEnabled()}
+                  className="rounded-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Calculator className="h-4 w-4" />
+                  Calculate
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Results Display */}
-          {calculationVariant === "duration-based" &&
-            completionTime &&
-            timeCompleted && (
-              <div className="space-y-2">
-                <h1 className="text-2xl text-center font-bold text-white">
-                  Work Time Completes at: {completionTime}
-                </h1>
-                <h3 className="text-md text-center font-semibold text-gray-400">
-                  Total work time you have completed till now: {timeCompleted}
-                </h3>
-                <h3 className="text-md text-center font-semibold text-green-400">
-                  Remaining work time: {timeRemaining}
-                </h3>
-              </div>
-            )}
+          {/* Results Display - Only show when showResults is true */}
+          {showResults && (
+            <>
+              {calculationVariant === "duration-based" &&
+                completionTime &&
+                timeCompleted && (
+                  <div className="space-y-2">
+                    <h1 className="text-2xl text-center font-bold text-white">
+                      Work Time Completes at: {completionTime}
+                    </h1>
+                    <h3 className="text-md text-center font-semibold text-gray-400">
+                      Total work time you have completed till now:{" "}
+                      {timeCompleted}
+                    </h3>
+                    <h3 className="text-md text-center font-semibold text-green-400">
+                      Remaining work time: {timeRemaining}
+                    </h3>
+                  </div>
+                )}
 
-          {calculationVariant === "time-based" && workTimeStatus && (
-            <div className="space-y-2">
-              <h1
-                className={`text-2xl text-center font-bold ${
-                  workTimeStatus.isCompleted ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {workTimeStatus.isCompleted
-                  ? "✅ Work Time Can Be Completed!"
-                  : "❌ Work Time Cannot Be Completed"}
-              </h1>
-              <h3 className="text-md text-center font-semibold text-gray-400">
-                Available work time: {workTimeStatus.availableTime}
-              </h3>
-              <h3 className="text-md text-center font-semibold text-gray-400">
-                Required work time: {workTimeStatus.requiredTime}
-              </h3>
-              <h3
-                className={`text-md text-center font-semibold ${
-                  workTimeStatus.surplus ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {workTimeStatus.surplus ? "Extra time: " : "Shortfall: "}
-                {workTimeStatus.difference}
-              </h3>
-            </div>
+              {calculationVariant === "time-based" && workTimeStatus && (
+                <div className="space-y-2">
+                  <h1
+                    className={`text-2xl text-center font-bold ${
+                      workTimeStatus.isCompleted
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {workTimeStatus.isCompleted
+                      ? "✅ Work Time Can Be Completed!"
+                      : "❌ Work Time Cannot Be Completed"}
+                  </h1>
+                  <h3 className="text-md text-center font-semibold text-gray-400">
+                    Available work time: {workTimeStatus.availableTime}
+                  </h3>
+                  <h3 className="text-md text-center font-semibold text-gray-400">
+                    Required work time: {workTimeStatus.requiredTime}
+                  </h3>
+                  <h3
+                    className={`text-md text-center font-semibold ${
+                      workTimeStatus.surplus ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {workTimeStatus.surplus ? "Extra time: " : "Shortfall: "}
+                    {workTimeStatus.difference}
+                  </h3>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div className="absolute bottom-6 text-white">
