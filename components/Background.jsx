@@ -59,7 +59,7 @@ const Background = ({ children }) => {
 
       <div
         className={cn(
-          "bg-black fixed inset-0 transition-opacity duration-[1500ms]",
+          "bg-black fixed inset-0 transition-opacity duration-1500",
           !showBackground ? "opacity-100" : "opacity-0"
         )}
       ></div>
