@@ -179,16 +179,16 @@ const SkeletonNatureScene = () => {
       <Bird x="5%" y="25%" delay={5} />
       <Bird x="15%" y="18%" delay={8} />
 
-      {/* --- THE MOUNTAINS (Multiple Layered Peaks) --- */}
-      <div className="absolute bottom-0 left-0 right-0 h-[60%] z-10">
+      {/* --- THE MOUNTAINS (Background - Taller) --- */}
+      <div className="absolute bottom-0 left-0 right-0 h-[75%] z-10">
         <svg
           className="w-full h-full"
-          viewBox="0 0 800 400"
+          viewBox="0 0 800 500"
           preserveAspectRatio="none"
         >
           {/* Far Back Mountains (Very Faded) */}
           <path
-            d="M-50 400 L100 280 L200 320 L300 250 L400 300 L500 220 L600 280 L700 240 L850 400 Z"
+            d="M-50 500 L100 320 L200 370 L300 280 L400 350 L500 250 L600 330 L700 290 L850 500 Z"
             fill="rgba(244, 114, 182, 0.03)"
             stroke="#f472b6"
             strokeWidth="1"
@@ -198,7 +198,7 @@ const SkeletonNatureScene = () => {
 
           {/* Back Mountains Layer 1 */}
           <path
-            d="M-50 400 L80 300 L180 340 L280 270 L380 320 L480 250 L580 300 L680 260 L780 320 L900 400 Z"
+            d="M-50 500 L80 350 L180 400 L280 320 L380 380 L480 300 L580 360 L680 310 L780 380 L900 500 Z"
             fill="rgba(244, 114, 182, 0.05)"
             stroke="#f472b6"
             strokeWidth="1"
@@ -208,7 +208,7 @@ const SkeletonNatureScene = () => {
 
           {/* Back Mountains Layer 2 */}
           <path
-            d="M-50 400 L50 320 L150 360 L250 290 L350 340 L450 270 L550 320 L650 280 L750 340 L850 400 Z"
+            d="M-50 500 L50 380 L150 430 L250 340 L350 410 L450 320 L550 390 L650 330 L750 410 L850 500 Z"
             fill="rgba(244, 114, 182, 0.06)"
             stroke="#f472b6"
             strokeWidth="1.5"
@@ -218,7 +218,7 @@ const SkeletonNatureScene = () => {
 
           {/* Middle Mountains (More Visible) */}
           <path
-            d="M-100 400 Q 100 240 200 380 Q 300 200 400 360 Q 500 180 600 380 Q 700 220 900 400"
+            d="M-100 500 Q 100 280 200 450 Q 300 230 400 430 Q 500 200 600 450 Q 700 260 900 500"
             fill="rgba(244, 114, 182, 0.08)"
             stroke="#f472b6"
             strokeWidth="1.5"
@@ -226,32 +226,18 @@ const SkeletonNatureScene = () => {
             className="opacity-40"
           />
 
-          {/* Trees on Middle Hill */}
-          <RoundTree x="150" y="320" scale="0.6" />
-          <RoundTree x="200" y="340" scale="0.5" />
-          <RoundTree x="550" y="330" scale="0.6" />
-          <RoundTree x="700" y="300" scale="0.7" />
-
-          {/* Front Mountain Range (Most Prominent) */}
+          {/* Front Mountain Range (Most Prominent - Taller Peaks) */}
           <path
-            d="M-50 400 L150 280 L250 340 L350 200 L450 300 L550 180 L650 280 L750 240 L900 400 Z"
+            d="M-50 500 L150 320 L250 400 L350 220 L450 360 L550 180 L650 330 L750 270 L900 500 Z"
             fill="rgba(244, 114, 182, 0.1)"
             stroke="#f472b6"
             strokeWidth="2"
             className="opacity-60"
           />
 
-          {/* Trees on Front Mountains */}
-          <RoundTree x="180" y="310" scale="0.9" />
-          <RoundTree x="250" y="350" scale="0.8" />
-          <RoundTree x="380" y="250" scale="0.7" />
-          <RoundTree x="480" y="320" scale="0.9" />
-          <RoundTree x="580" y="230" scale="0.8" />
-          <RoundTree x="680" y="300" scale="1" />
-
           {/* Contour Lines on Main Peak */}
           <path
-            d="M480 250 Q 550 200 620 250"
+            d="M480 300 Q 550 220 620 300"
             stroke="#f472b6"
             strokeWidth="1"
             strokeDasharray="3 3"
@@ -273,8 +259,8 @@ const SkeletonNatureScene = () => {
         </svg>
       </div>
 
-      {/* --- THE RIVER (Wireframe Data Streams) --- */}
-      <div className="absolute bottom-0 left-0 right-0 h-[25%] z-20 overflow-hidden">
+      {/* --- THE RIVER (At ground level, below mountains) --- */}
+      <div className="absolute bottom-0 left-0 right-0 h-[20%] z-20 overflow-hidden">
         <svg
           className="w-full h-full"
           viewBox="0 0 800 100"
@@ -304,6 +290,27 @@ const SkeletonNatureScene = () => {
         </svg>
         {/* Subtle Glow */}
         <div className="absolute inset-0 bg-gradient-to-t from-pink-500/5 to-transparent" />
+      </div>
+
+      {/* --- FOREGROUND TREES (Around the river, on ground) --- */}
+      <div className="absolute bottom-0 left-0 right-0 h-[25%] z-30">
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 800 150"
+          preserveAspectRatio="none"
+        >
+          {/* Trees scattered around the river */}
+          <RoundTree x="50" y="130" scale="1.2" />
+          <RoundTree x="120" y="135" scale="1" />
+          <RoundTree x="180" y="125" scale="1.3" />
+          <RoundTree x="280" y="140" scale="0.9" />
+          <RoundTree x="350" y="130" scale="1.1" />
+          <RoundTree x="450" y="135" scale="1.2" />
+          <RoundTree x="520" y="125" scale="1" />
+          <RoundTree x="620" y="140" scale="1.3" />
+          <RoundTree x="700" y="130" scale="1.1" />
+          <RoundTree x="750" y="135" scale="0.9" />
+        </svg>
       </div>
 
       {/* Tech Overlay */}
