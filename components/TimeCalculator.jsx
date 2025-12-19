@@ -8,47 +8,62 @@ import AnimatedTimeDisplay from "./AnimatedTime";
 import Background from "./Background";
 import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { ScrollArea } from "./ui/scroll-area";
+import { ThemeDialog } from "./global/ThemeDialog";
+import { ThemeButton } from "./global/ThemeButton";
+import { useWorkTimeStore } from "@/store/workTimeStore";
 
 function TimeCalculator() {
+  // Zustand store
+  const {
+    arrivalTime,
+    workMode,
+    firstBreak,
+    breaks,
+    fullDayHours,
+    fullDayMinutes,
+    halfDayHours,
+    halfDayMinutes,
+    completionTime,
+    timeCompleted,
+    timeRemaining,
+    setArrivalTime,
+    setWorkMode,
+    setFirstBreak,
+    addBreak,
+    updateBreak,
+    removeBreak,
+    setFullDayTime,
+    setHalfDayTime,
+    setCalculationResults,
+    resetToDefaults,
+    checkAndResetIfNewDay,
+  } = useWorkTimeStore();
+
+  // Local UI state
   const [currentTime, setCurrentTime] = useState(dayjs());
-  const [completionTime, setCompletionTime] = useState("");
-  const [arrivalTime, setArrivalTime] = useState(undefined);
-  const [firstBreak, setFirstBreak] = useState(new Date(0, 0, 0, 0, 0, 0));
-  const [breaks, setBreaks] = useState([]);
-  const [timeCompleted, setTimeCompleted] = useState(null);
-  const [timeRemaining, setTimeRemaining] = useState(null);
-  const [workMode, setWorkMode] = useState("full"); // "full" or "half"
   const [showSettings, setShowSettings] = useState(false);
 
-  // Default work times (in minutes)
-  const defaultFullDayMinutes = 8 * 60 + 15; // 8h15m
-  const defaultHalfDayMinutes = 4 * 60 + 15; // 4h15m
+  // Check and reset if new day on mount
+  useEffect(() => {
+    checkAndResetIfNewDay();
+  }, [checkAndResetIfNewDay]);
 
-  // Custom work times
-  const [fullDayHours, setFullDayHours] = useState(8);
-  const [fullDayMinutes, setFullDayMinutes] = useState(15);
-  const [halfDayHours, setHalfDayHours] = useState(4);
-  const [halfDayMinutes, setHalfDayMinutes] = useState(15);
+  // Ensure dates are properly initialized (convert null to undefined for TimePicker)
+  const safeArrivalTime = arrivalTime || undefined;
+  const safeFirstBreak = firstBreak || new Date(0, 0, 0, 0, 0, 0);
 
   // Work time based on selected mode
-  const getWorkTimeInMinutes = () => {
+  const getWorkTimeInMinutes = useCallback(() => {
     if (workMode === "full") {
       return fullDayHours * 60 + fullDayMinutes;
     } else {
       return halfDayHours * 60 + halfDayMinutes;
     }
-  };
+  }, [workMode, fullDayHours, fullDayMinutes, halfDayHours, halfDayMinutes]);
 
   const triggerConfetti = () => {
     confetti({
@@ -71,30 +86,6 @@ function TimeCalculator() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const addBreak = () => {
-    setBreaks([
-      ...breaks,
-      {
-        id: Date.now(),
-        duration: new Date(0, 0, 0, 0, 0, 0),
-      },
-    ]);
-  };
-
-  const updateBreak = (id, newBreakDuration) => {
-    const updatedBreaks = breaks.map((breakItem) =>
-      breakItem.id === id
-        ? { ...breakItem, duration: newBreakDuration }
-        : breakItem
-    );
-    setBreaks(updatedBreaks);
-  };
-
-  const removeBreak = (id) => {
-    const updatedBreaks = breaks.filter((breakItem) => breakItem.id !== id);
-    setBreaks(updatedBreaks);
-  };
-
   const calculateTotalBreakMinutes = useCallback(() => {
     const firstBreakMinutes =
       firstBreak.getHours() * 60 + firstBreak.getMinutes();
@@ -116,17 +107,10 @@ function TimeCalculator() {
         adjustedWorkTimeInMinutes,
         "minute"
       );
-      setCompletionTime(completion.format("hh:mm A"));
+      return completion.format("hh:mm A");
     }
-  }, [
-    arrivalTime,
-    calculateTotalBreakMinutes,
-    workMode,
-    fullDayHours,
-    fullDayMinutes,
-    halfDayHours,
-    halfDayMinutes,
-  ]);
+    return "";
+  }, [arrivalTime, calculateTotalBreakMinutes, getWorkTimeInMinutes]);
 
   const calculateTimeCompletedAndRemaining = useCallback(() => {
     if (arrivalTime) {
@@ -135,19 +119,19 @@ function TimeCalculator() {
         currentTime.diff(arrivalTime, "minute") - totalBreakMinutes;
       const workTimeInMinutes = getWorkTimeInMinutes();
 
+      let timeCompletedText;
+      let timeRemainingText;
+
       // Calculate time completed
       if (elapsedMinutes <= 0) {
-        setTimeCompleted("0 hours 0 minutes");
-        setTimeRemaining(
-          `${Math.floor(workTimeInMinutes / 60)} hours ${
-            workTimeInMinutes % 60
-          } minutes`
-        );
+        timeCompletedText = "0 hours 0 minutes";
+        timeRemainingText = `${Math.floor(workTimeInMinutes / 60)} hours ${
+          workTimeInMinutes % 60
+        } minutes`;
       } else {
         const completedHours = Math.floor(elapsedMinutes / 60);
         const completedMinutes = elapsedMinutes % 60;
-        const timeCompletedText = `${completedHours} hours ${completedMinutes} minutes`;
-        setTimeCompleted(timeCompletedText);
+        timeCompletedText = `${completedHours} hours ${completedMinutes} minutes`;
 
         // Calculate time remaining
         const remainingMinutes = Math.max(
@@ -156,11 +140,10 @@ function TimeCalculator() {
         );
         const remainingHours = Math.floor(remainingMinutes / 60);
         const remainingMins = remainingMinutes % 60;
-        const timeRemainingText =
+        timeRemainingText =
           remainingMinutes > 0
             ? `${remainingHours} hours ${remainingMins} minutes`
             : "0 hours 0 minutes (Completed!)";
-        setTimeRemaining(timeRemainingText);
 
         const firstBreakMinutes =
           firstBreak.getHours() * 60 + firstBreak.getMinutes();
@@ -178,22 +161,36 @@ function TimeCalculator() {
           triggerConfetti();
         }
       }
+
+      return {
+        timeCompleted: timeCompletedText,
+        timeRemaining: timeRemainingText,
+      };
     }
+    return { timeCompleted: null, timeRemaining: null };
   }, [
     arrivalTime,
     calculateTotalBreakMinutes,
     currentTime,
-    workMode,
-    fullDayHours,
-    fullDayMinutes,
-    halfDayHours,
-    halfDayMinutes,
+    firstBreak,
+    breaks.length,
+    getWorkTimeInMinutes,
   ]);
 
   useEffect(() => {
     if (arrivalTime) {
-      calculateCompletionTime();
-      calculateTimeCompletedAndRemaining();
+      const newCompletionTime = calculateCompletionTime();
+      const {
+        timeCompleted: newTimeCompleted,
+        timeRemaining: newTimeRemaining,
+      } = calculateTimeCompletedAndRemaining();
+
+      // Save results to store
+      setCalculationResults({
+        completionTime: newCompletionTime,
+        timeCompleted: newTimeCompleted,
+        timeRemaining: newTimeRemaining,
+      });
     }
   }, [
     arrivalTime,
@@ -202,38 +199,27 @@ function TimeCalculator() {
     calculateCompletionTime,
     calculateTimeCompletedAndRemaining,
     currentTime,
-    workMode,
-    fullDayHours,
-    fullDayMinutes,
-    halfDayHours,
-    halfDayMinutes,
+    setCalculationResults,
   ]);
 
   const handleFullDayHoursChange = (e) => {
     const value = parseInt(e.target.value) || 0;
-    setFullDayHours(value);
+    setFullDayTime(value, fullDayMinutes);
   };
 
   const handleFullDayMinutesChange = (e) => {
     const value = parseInt(e.target.value) || 0;
-    setFullDayMinutes(Math.min(59, value));
+    setFullDayTime(fullDayHours, Math.min(59, value));
   };
 
   const handleHalfDayHoursChange = (e) => {
     const value = parseInt(e.target.value) || 0;
-    setHalfDayHours(value);
+    setHalfDayTime(value, halfDayMinutes);
   };
 
   const handleHalfDayMinutesChange = (e) => {
     const value = parseInt(e.target.value) || 0;
-    setHalfDayMinutes(Math.min(59, value));
-  };
-
-  const resetToDefaults = () => {
-    setFullDayHours(8);
-    setFullDayMinutes(15);
-    setHalfDayHours(4);
-    setHalfDayMinutes(15);
+    setHalfDayTime(halfDayHours, Math.min(59, value));
   };
 
   return (
@@ -261,123 +247,112 @@ function TimeCalculator() {
           </div>
 
           {/* Settings Dialog */}
-          <Dialog
+          <ThemeDialog
             open={showSettings}
             onOpenChange={setShowSettings}
-            className="rounded-full"
+            title="Work Time Settings"
+            footer={
+              <>
+                <ThemeButton variant="outline" onClick={resetToDefaults}>
+                  Reset to Defaults
+                </ThemeButton>
+                <ThemeButton
+                  variant="primary"
+                  onClick={() => setShowSettings(false)}
+                >
+                  Save Settings
+                </ThemeButton>
+              </>
+            }
           >
-            <DialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-semibold text-white">
-                  Work Time Settings
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-200 mb-2">
-                    Full Day Work Time
-                  </h4>
-                  <div className="flex gap-3 items-center">
-                    <div className="flex flex-col">
-                      <Label
-                        htmlFor="fullDayHours"
-                        className="text-xs text-gray-300 mb-1"
-                      >
-                        Hours
-                      </Label>
-                      <Input
-                        id="fullDayHours"
-                        type="number"
-                        min="0"
-                        max="24"
-                        value={fullDayHours}
-                        onChange={handleFullDayHoursChange}
-                        className="w-20 bg-gray-700/50 border-gray-600"
-                      />
-                    </div>
-                    <span className="text-white mt-6">:</span>
-                    <div className="flex flex-col">
-                      <Label
-                        htmlFor="fullDayMinutes"
-                        className="text-xs text-gray-300 mb-1"
-                      >
-                        Minutes
-                      </Label>
-                      <Input
-                        id="fullDayMinutes"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={fullDayMinutes}
-                        onChange={handleFullDayMinutesChange}
-                        className="w-20 bg-gray-700/50 border-gray-600"
-                      />
-                    </div>
+            <div className="space-y-4 py-4">
+              <div>
+                <h4 className="text-sm font-medium text-gray-200 mb-2">
+                  Full Day Work Time
+                </h4>
+                <div className="flex gap-3 items-center">
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor="fullDayHours"
+                      className="text-xs text-gray-300 mb-1"
+                    >
+                      Hours
+                    </Label>
+                    <Input
+                      id="fullDayHours"
+                      type="number"
+                      min="0"
+                      max="24"
+                      value={fullDayHours}
+                      onChange={handleFullDayHoursChange}
+                      className="w-20 bg-gray-700/50 border-gray-600"
+                    />
                   </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-200 mb-2">
-                    Half Day Work Time
-                  </h4>
-                  <div className="flex gap-3 items-center">
-                    <div className="flex flex-col">
-                      <Label
-                        htmlFor="halfDayHours"
-                        className="text-xs text-gray-300 mb-1"
-                      >
-                        Hours
-                      </Label>
-                      <Input
-                        id="halfDayHours"
-                        type="number"
-                        min="0"
-                        max="24"
-                        value={halfDayHours}
-                        onChange={handleHalfDayHoursChange}
-                        className="w-20 bg-gray-700/50 border-gray-600"
-                      />
-                    </div>
-                    <span className="text-white mt-6">:</span>
-                    <div className="flex flex-col">
-                      <Label
-                        htmlFor="halfDayMinutes"
-                        className="text-xs text-gray-300 mb-1"
-                      >
-                        Minutes
-                      </Label>
-                      <Input
-                        id="halfDayMinutes"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={halfDayMinutes}
-                        onChange={handleHalfDayMinutesChange}
-                        className="w-20 bg-gray-700/50 border-gray-600"
-                      />
-                    </div>
+                  <span className="text-white mt-6">:</span>
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor="fullDayMinutes"
+                      className="text-xs text-gray-300 mb-1"
+                    >
+                      Minutes
+                    </Label>
+                    <Input
+                      id="fullDayMinutes"
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={fullDayMinutes}
+                      onChange={handleFullDayMinutesChange}
+                      className="w-20 bg-gray-700/50 border-gray-600"
+                    />
                   </div>
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={resetToDefaults}
-                  className="text-gray-300 border-gray-600 hover:bg-gray-700 rounded-full"
-                >
-                  Reset to Defaults
-                </Button>
-                <Button
-                  onClick={() => setShowSettings(false)}
-                  className="bg-cyan-900 hover:bg-cyan-600 text-cyan-200 rounded-full"
-                >
-                  Save Settings
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              <div>
+                <h4 className="text-sm font-medium text-gray-200 mb-2">
+                  Half Day Work Time
+                </h4>
+                <div className="flex gap-3 items-center">
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor="halfDayHours"
+                      className="text-xs text-gray-300 mb-1"
+                    >
+                      Hours
+                    </Label>
+                    <Input
+                      id="halfDayHours"
+                      type="number"
+                      min="0"
+                      max="24"
+                      value={halfDayHours}
+                      onChange={handleHalfDayHoursChange}
+                      className="w-20 bg-gray-700/50 border-gray-600"
+                    />
+                  </div>
+                  <span className="text-white mt-6">:</span>
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor="halfDayMinutes"
+                      className="text-xs text-gray-300 mb-1"
+                    >
+                      Minutes
+                    </Label>
+                    <Input
+                      id="halfDayMinutes"
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={halfDayMinutes}
+                      onChange={handleHalfDayMinutesChange}
+                      className="w-20 bg-gray-700/50 border-gray-600"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ThemeDialog>
 
           {/* Work Mode Selection */}
           <div className="flex gap-4 justify-between items-center">
@@ -409,7 +384,7 @@ function TimeCalculator() {
               <div className="text-xs opacity-80">(24-hour time format)</div>
             </div>
             <TimePickerDemo
-              date={arrivalTime}
+              date={safeArrivalTime}
               setDate={setArrivalTime}
               showSeconds={false}
             />
@@ -418,7 +393,7 @@ function TimeCalculator() {
           <div className="flex gap-4 justify-between items-center">
             <div className="font-medium text-white">First Break Duration</div>
             <TimePickerDemo
-              date={firstBreak}
+              date={safeFirstBreak}
               setDate={setFirstBreak}
               showMinutes={true}
               showSeconds={false}

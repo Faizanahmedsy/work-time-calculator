@@ -21,14 +21,6 @@ import { v4 as uuidv4 } from "uuid";
 import { defaultCols, initialTasks } from "./constants/kanban.constants";
 import { Button } from "../ui/button";
 import { InteractiveHoverButton } from "../ui/interactive-hover-button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "../ui/dialog";
 import { Input } from "../ui/input";
 import {
   Select,
@@ -39,6 +31,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
+import { ThemeDialog } from "../global/ThemeDialog";
+import { ThemeButton } from "../global/ThemeButton";
 
 const TASKS_STORAGE_KEY = "kanban-tasks";
 
@@ -324,99 +318,84 @@ export function KanbanBoard() {
       </DndContext>
 
       {/* Add/Edit Task Dialog */}
-      <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-        <DialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-white">
-              {isEditing ? "Edit Task" : "Add New Task"}
-            </DialogTitle>
-            <DialogDescription>
-              {isEditing
-                ? "Make changes to your task below."
-                : "Enter the details for your new task below."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="task-content">Task Content</Label>
-              <Input
-                id="task-content"
-                value={taskContent}
-                onChange={(e) => setTaskContent(e.target.value)}
-                placeholder="Enter task description..."
-                className="col-span-3"
-                autoFocus
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="task-column">Column</Label>
-              <Select value={taskColumnId} onValueChange={setTaskColumnId}>
-                <SelectTrigger className="w-full" id="task-column">
-                  <SelectValue placeholder="Select a column" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {columns.map((col) => (
-                      <SelectItem key={col.id} value={col.id}>
-                        {col.title}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
+      <ThemeDialog
+        open={showTaskDialog}
+        onOpenChange={setShowTaskDialog}
+        title={isEditing ? "Edit Task" : "Add New Task"}
+        description={
+          isEditing
+            ? "Make changes to your task below."
+            : "Enter the details for your new task below."
+        }
+        footer={
+          <>
+            <ThemeButton
               variant="outline"
               onClick={() => setShowTaskDialog(false)}
-              className="text-gray-300 border-gray-600 hover:bg-gray-700 rounded-full"
             >
               Cancel
-            </Button>
-            <Button
-              onClick={handleTaskSubmit}
-              className="bg-cyan-900 hover:bg-cyan-600 text-cyan-200 rounded-full"
-            >
+            </ThemeButton>
+            <ThemeButton variant="primary" onClick={handleTaskSubmit}>
               {isEditing ? "Save Changes" : "Add Task"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </ThemeButton>
+          </>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="task-content">Task Content</Label>
+            <Input
+              id="task-content"
+              value={taskContent}
+              onChange={(e) => setTaskContent(e.target.value)}
+              placeholder="Enter task description..."
+              className="col-span-3"
+              autoFocus
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="task-column">Column</Label>
+            <Select value={taskColumnId} onValueChange={setTaskColumnId}>
+              <SelectTrigger className="w-full" id="task-column">
+                <SelectValue placeholder="Select a column" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {columns.map((col) => (
+                    <SelectItem key={col.id} value={col.id}>
+                      {col.title}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </ThemeDialog>
 
       {/* Delete All Confirmation Modal */}
-      <Dialog open={showDeleteAllModal} onOpenChange={setShowDeleteAllModal}>
-        <DialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-white">
-              Confirm Delete All Tasks
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete all tasks from all columns? This
-              action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button
+      <ThemeDialog
+        open={showDeleteAllModal}
+        onOpenChange={setShowDeleteAllModal}
+        title="Confirm Delete All Tasks"
+        description="Are you sure you want to delete all tasks from all columns? This action cannot be undone."
+        footer={
+          <>
+            <ThemeButton
               variant="outline"
               onClick={() => setShowDeleteAllModal(false)}
-              className="text-gray-300 border-gray-600 hover:bg-gray-700 rounded-full py-0"
             >
               Cancel
-            </Button>
-            <Button
-              onClick={deleteAllTasks}
-              className="bg-red-600 hover:bg-red-700 text-rose-100 rounded-full flex justify-center items-center py-0"
-            >
+            </ThemeButton>
+            <ThemeButton variant="destructive" onClick={deleteAllTasks}>
               Delete All
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </ThemeButton>
+          </>
+        }
+      >
+        {/* Empty content - description is in the dialog header */}
+      </ThemeDialog>
     </>
   );
 
