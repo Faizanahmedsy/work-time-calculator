@@ -56,7 +56,12 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-8">
           <NavLink href="/">Timer</NavLink>
-          <NavLink href="/your-day">Your Day</NavLink>
+          <div className="relative">
+            <NavLink href="/your-day">Your Day</NavLink>
+            <span className="absolute -top-1.5 -right-7 text-[7px] font-bold bg-cyan-500 text-white px-1 py-0.5 rounded-full animate-pulse">
+              NEW
+            </span>
+          </div>
           <NavLink href="/kanban">Kanban</NavLink>
           <NavLink href="/changelog">Changelog</NavLink>
         </div>

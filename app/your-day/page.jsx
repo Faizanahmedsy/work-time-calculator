@@ -45,6 +45,7 @@ import {
   Coffee,
   ListTodo,
   RotateCcw,
+  Copy,
   Trash2,
   X,
 } from "lucide-react";
@@ -58,7 +59,9 @@ import {
 } from "date-fns";
 
 import { useCalendarStore } from "@/store/useCalendarStore";
+import { useWorkTimeStore } from "@/store/workTimeStore";
 import { ThemeTimePicker } from "@/components/global";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   DndContext,
@@ -75,6 +78,40 @@ import {
 import Background from "@/components/Background";
 import Link from "next/link";
 
+// Color options for events
+const EVENT_COLORS = [
+  {
+    name: "Cyan",
+    value: "cyan",
+    class: "bg-cyan-900/30 text-cyan-200 border-cyan-700/50",
+  },
+  {
+    name: "Purple",
+    value: "purple",
+    class: "bg-purple-900/30 text-purple-200 border-purple-700/50",
+  },
+  {
+    name: "Pink",
+    value: "pink",
+    class: "bg-pink-900/30 text-pink-200 border-pink-700/50",
+  },
+  {
+    name: "Orange",
+    value: "orange",
+    class: "bg-orange-900/30 text-orange-200 border-orange-700/50",
+  },
+  {
+    name: "Emerald",
+    value: "emerald",
+    class: "bg-emerald-900/30 text-emerald-200 border-emerald-700/50",
+  },
+  {
+    name: "Blue",
+    value: "blue",
+    class: "bg-blue-900/30 text-blue-200 border-blue-700/50",
+  },
+];
+
 export default function YourDayPage() {
   const {
     workStart,
@@ -88,16 +125,61 @@ export default function YourDayPage() {
     reset,
   } = useCalendarStore();
 
+  const { toast } = useToast();
+
+  // Get timer data for syncing
+  const { arrivalTime } = useWorkTimeStore();
+
   const [isMultiple, setIsMultiple] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const [hasInitializedFromTimer, setHasInitializedFromTimer] =
+    React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Sync timer data to work hours - ONE TIME ONLY as default value
+  React.useEffect(() => {
+    // Only sync once when page first loads with timer data
+    if (
+      arrivalTime &&
+      mounted &&
+      !hasInitializedFromTimer &&
+      workStart === "09:00"
+    ) {
+      // Convert arrival time to HH:mm format with 5-minute intervals
+      const hours = arrivalTime.getHours().toString().padStart(2, "0");
+      const rawMinutes = arrivalTime.getMinutes();
+
+      // Round to nearest 5-minute interval for ThemeTimePicker compatibility
+      const roundedMinutes = Math.round(rawMinutes / 5) * 5;
+      const minutes = (roundedMinutes === 60 ? 0 : roundedMinutes)
+        .toString()
+        .padStart(2, "0");
+
+      // Adjust hours if minutes rounded to 60
+      const adjustedHours =
+        roundedMinutes === 60
+          ? ((parseInt(hours) + 1) % 24).toString().padStart(2, "0")
+          : hours;
+
+      const arrivalTimeStr = `${adjustedHours}:${minutes}`;
+
+      setWorkStart(arrivalTimeStr);
+      setHasInitializedFromTimer(true); // Mark as initialized
+    }
+  }, [arrivalTime, mounted, hasInitializedFromTimer, workStart, setWorkStart]);
+
   const [draftEvents, setDraftEvents] = React.useState([
-    { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
+    {
+      type: "task",
+      startTime: "11:00",
+      endTime: "12:00",
+      title: "",
+      color: "cyan",
+    },
   ]);
 
   const handleAddEvent = () => {
@@ -112,35 +194,125 @@ export default function YourDayPage() {
     };
 
     validDrafts.forEach((draft) => {
+      const selectedColor =
+        EVENT_COLORS.find((c) => c.value === draft.color) || EVENT_COLORS[0];
       const event = {
         id: Math.random().toString(36).substr(2, 9),
         title: draft.title,
         startTime: draft.startTime,
         endTime: draft.endTime,
         type: draft.type || "task",
-        color: colors[draft.type || "task"],
+        color: selectedColor.class,
       };
       addEvent(event);
     });
 
     if (isMultiple) {
       setDraftEvents([
-        { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
-        { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
-        { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
+        {
+          type: "task",
+          startTime: "11:00",
+          endTime: "12:00",
+          title: "",
+          color: "cyan",
+        },
+        {
+          type: "task",
+          startTime: "11:00",
+          endTime: "12:00",
+          title: "",
+          color: "cyan",
+        },
+        {
+          type: "task",
+          startTime: "11:00",
+          endTime: "12:00",
+          title: "",
+          color: "cyan",
+        },
       ]);
     } else {
       setDraftEvents([
-        { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
+        {
+          type: "task",
+          startTime: "11:00",
+          endTime: "12:00",
+          title: "",
+          color: "cyan",
+        },
       ]);
       setDialogOpen(false);
     }
   };
 
+  // Copy EOD Report - Lists all tasks excluding breaks
+  const copyEODReport = () => {
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    // Filter only tasks (exclude breaks)
+    const tasks = events.filter((event) => event.type === "task");
+
+    if (tasks.length === 0) {
+      toast({
+        title: "No tasks found",
+        description:
+          "Add some tasks to your day first to generate an EOD report.",
+      });
+      return;
+    }
+
+    // Sort tasks by start time
+    const sortedTasks = [...tasks].sort((a, b) => {
+      const timeA = parse(a.startTime, "HH:mm", new Date());
+      const timeB = parse(b.startTime, "HH:mm", new Date());
+      return timeA - timeB;
+    });
+
+    // Format tasks list
+    const tasksList = sortedTasks
+      .map(
+        (task) =>
+          `- ${task.title} (${formatTime12h(task.startTime)} - ${formatTime12h(
+            task.endTime
+          )})`
+      )
+      .join("\n");
+
+    const eodReport = `EOD ${formattedDate}\n--------------------------\n${tasksList}`;
+
+    navigator.clipboard
+      .writeText(eodReport)
+      .then(() => {
+        toast({
+          title: "EOD Report copied!",
+          description: "You can now paste it anywhere.",
+        });
+      })
+      .catch((error) => {
+        console.error("Error copying EOD report:", error);
+        toast({
+          title: "Error copying report",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+      });
+  };
+
   const addMoreForm = () => {
     setDraftEvents([
       ...draftEvents,
-      { type: "task", startTime: "11:00", endTime: "12:00", title: "" },
+      {
+        type: "task",
+        startTime: "11:00",
+        endTime: "12:00",
+        title: "",
+        color: "cyan",
+      },
     ]);
   };
 
@@ -204,7 +376,16 @@ export default function YourDayPage() {
     const start = parse(workStart, "HH:mm", new Date());
     const end = parse(workEnd, "HH:mm", new Date());
 
-    let current = start;
+    // Round down to nearest 30-minute interval
+    const startHour = start.getHours();
+    const startMinute = start.getMinutes();
+    const roundedStartMinute = startMinute >= 30 ? 30 : 0;
+
+    let current = new Date(start);
+    current.setMinutes(roundedStartMinute);
+    current.setSeconds(0);
+    current.setMilliseconds(0);
+
     while (current <= end) {
       slots.push(format(current, "HH:mm"));
       current = addMinutes(current, 30);
@@ -336,15 +517,18 @@ export default function YourDayPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Copy EOD Report Button */}
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700"
+                onClick={copyEODReport}
+                className="bg-gray-800/50 border-gray-700 text-cyan-400 hover:bg-cyan-900/20"
               >
-                <Calendar className="w-4 h-4 mr-2" />
-                Today
+                <Copy className="w-4 h-4 mr-2" />
+                Copy EOD Report
               </Button>
 
+              {/* Reset Button */}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -377,7 +561,6 @@ export default function YourDayPage() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -388,7 +571,7 @@ export default function YourDayPage() {
                     Add Event
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-3xl max-h-[85vh] bg-gray-800/95 border-gray-700 text-white backdrop-blur-xl overflow-y-auto">
+                <DialogContent className="sm:max-w-3xl max-h-[85vh] bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-2xl">
                       Add New Event
@@ -476,6 +659,36 @@ export default function YourDayPage() {
                                   updateDraft(index, { title: e.target.value })
                                 }
                               />
+                            </div>
+
+                            {/* Color Picker */}
+                            <div className="space-y-2">
+                              <Label>Color</Label>
+                              <div className="grid grid-cols-6 gap-2">
+                                {EVENT_COLORS.map((color) => (
+                                  <button
+                                    key={color.value}
+                                    type="button"
+                                    onClick={() =>
+                                      updateDraft(index, { color: color.value })
+                                    }
+                                    className={`h-10 rounded-lg border-2 transition-all ${
+                                      draft.color === color.value
+                                        ? `${color.class} border-opacity-100 ring-2 ring-offset-2 ring-offset-gray-900 ring-${color.value}-500`
+                                        : `${color.class} border-transparent opacity-60 hover:opacity-100`
+                                    }`}
+                                    title={color.name}
+                                  >
+                                    {draft.color === color.value && (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-xs font-bold">
+                                          ✓
+                                        </span>
+                                      </div>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
 
                             {/* Type and Times - Compact Row */}
@@ -601,7 +814,18 @@ export default function YourDayPage() {
                     variant="outline"
                     className="w-full justify-start gap-2 bg-gray-900/50 border-gray-700 text-emerald-300 hover:bg-emerald-900/20"
                     size="sm"
-                    onClick={() => setDialogOpen(true)}
+                    onClick={() => {
+                      setDraftEvents([
+                        {
+                          type: "break",
+                          startTime: "11:00",
+                          endTime: "12:00",
+                          title: "",
+                          color: "emerald",
+                        },
+                      ]);
+                      setDialogOpen(true);
+                    }}
                   >
                     <Coffee className="w-4 h-4" />
                     Add Break
@@ -710,11 +934,14 @@ function DraggableEvent({
   };
 
   const handleSaveEdit = () => {
+    const selectedColor =
+      EVENT_COLORS.find((c) => c.value === editDraft.color) || EVENT_COLORS[0];
     updateEvent(event.id, {
       title: editDraft.title,
       startTime: editDraft.startTime,
       endTime: editDraft.endTime,
       type: editDraft.type,
+      color: selectedColor.class,
     });
     setIsEditDialogOpen(false);
   };
@@ -783,7 +1010,7 @@ function DraggableEvent({
         </div>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] bg-gray-800/95 border-gray-700 text-white backdrop-blur-xl">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
         <DialogHeader>
           <DialogTitle>Edit Event</DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -801,6 +1028,35 @@ function DraggableEvent({
               className="bg-gray-900/50 border-gray-700 text-white"
             />
           </div>
+
+          {/* Color Picker */}
+          <div className="space-y-2">
+            <Label>Color</Label>
+            <div className="grid grid-cols-6 gap-2">
+              {EVENT_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  onClick={() =>
+                    setEditDraft({ ...editDraft, color: color.value })
+                  }
+                  className={`h-10 rounded-lg border-2 transition-all ${
+                    editDraft.color === color.value
+                      ? `${color.class} border-opacity-100 ring-2 ring-offset-2 ring-offset-gray-900 ring-${color.value}-500`
+                      : `${color.class} border-transparent opacity-60 hover:opacity-100`
+                  }`}
+                  title={color.name}
+                >
+                  {editDraft.color === color.value && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-xs font-bold">✓</span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Type</Label>

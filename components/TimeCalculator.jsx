@@ -193,7 +193,7 @@ function TimeCalculator() {
 
   return (
     <Background>
-      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10">
+      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10 max-w-lg mx-auto">
         {/* {breaks.length === 0 && (
           <div>
             <h1 className="text-6xl font-bold">
@@ -202,28 +202,43 @@ function TimeCalculator() {
           </div>
         )} */}
 
-        {/* Feature Announcement Banner */}
-        <Link
-          href="/changelog"
-          className="group max-w-2xl w-full bg-gradient-to-r from-cyan-900/30 to-blue-900/30 backdrop-blur-sm border border-cyan-700/30 rounded-2xl p-4 hover:from-cyan-900/40 hover:to-blue-900/40 transition-all duration-300 cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
-                <span className="text-xl">✨</span>
+        {/* Feature Announcement Banner - Only show when no meaningful time input */}
+        {(!arrivalTime ||
+          (arrivalTime.getHours() === 0 && arrivalTime.getMinutes() === 0)) && (
+          <Link
+            href="/your-day"
+            className="group max-w-2xl w-full bg-cyan-950/10 backdrop-blur-sm border border-cyan-700/40 rounded-2xl p-5  transition-all duration-300 cursor-pointer mb-6"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <p className="text-base font-bold text-cyan-100 group-hover:text-white mb-2">
+                  New Features: Save Locally + Plan Your Day!
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-2">
+                    <span className="text-cyan-400 mt-0.5">✨</span>
+                    <p className="text-xs text-gray-300">
+                      Your time data now <strong>saves locally</strong> - never
+                      lose your work again
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-purple-400 mt-0.5">🗓️</span>
+                    <p className="text-xs text-gray-300">
+                      Plan your entire day with the new{" "}
+                      <strong>Your Day calendar</strong> - drag, drop &amp;
+                      schedule
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-cyan-400 mt-3 font-medium group-hover:text-cyan-300">
+                  Click to explore Your Day →
+                </p>
               </div>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-cyan-200 group-hover:text-cyan-100">
-                New Feature: Time saved locally!
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Your data now persists across refreshes. Click to learn more →
-              </p>
-            </div>
-          </div>
-        </Link>
-        <div className="flex flex-col gap-6 w-full max-w-2xl">
+          </Link>
+        )}
+        <div className="flex flex-col gap-6 w-full">
           {/* Settings Button */}
           <div className="flex justify-end">
             <Button

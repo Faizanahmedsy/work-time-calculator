@@ -18,7 +18,7 @@ export default function ChangelogPage() {
 
         {/* Timeline */}
         <div className="space-y-8">
-          {/* Latest Update */}
+          {/* Latest Update - Your Day */}
           <div className="relative pl-8 border-l-2 border-cyan-500/30">
             <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-cyan-500 ring-4 ring-slate-900"></div>
 
@@ -28,6 +28,98 @@ export default function ChangelogPage() {
               </span>
               <span className="text-xs px-2 py-1 bg-green-900/30 text-green-400 rounded-full border border-green-700/30">
                 Latest
+              </span>
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 shadow-xl">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-cyan-900/30 rounded-xl border border-cyan-700/30">
+                  <Calendar className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold mb-2">
+                    Your Day - Calendar Planner 🗓️
+                  </h3>
+                  <p className="text-gray-400 mb-4">
+                    Plan your entire work day with our beautiful new calendar
+                    interface!
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/30">
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Rocket className="w-4 h-4 text-cyan-400" />
+                    What&apos;s New?
+                  </h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>Visual Calendar:</strong> Plan your day with a
+                        beautiful timeline view showing all your tasks and
+                        breaks
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>Drag & Drop:</strong> Easily reschedule events
+                        by dragging them to new times
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>12-Hour Format:</strong> Professional time
+                        picker with 5-minute intervals and AM/PM
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>Batch Creation:</strong> Add multiple events at
+                        once with the multiple entry mode
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>Smart Layout:</strong> Events adapt their layout
+                        based on duration for optimal readability
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-400 mt-1">•</span>
+                      <span>
+                        <strong>Auto-Save:</strong> All your events persist in
+                        localStorage - never lose your schedule
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span>Try it now:</span>
+                  <Link
+                    href="/your-day"
+                    className="text-cyan-400 hover:text-cyan-300 font-medium underline underline-offset-2"
+                  >
+                    Open Your Day →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Previous Update - Local Storage */}
+          <div className="relative pl-8 border-l-2 border-gray-700/30">
+            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-600 ring-4 ring-slate-900"></div>
+
+            <div className="mb-2 flex items-center gap-3">
+              <span className="text-xs font-mono text-gray-500">
+                December 19, 2024
               </span>
             </div>
 
