@@ -65,20 +65,6 @@ function TimeCalculator() {
     }
   }, [workMode, fullDayHours, fullDayMinutes, halfDayHours, halfDayMinutes]);
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"],
-      duration: 3000,
-    });
-
-    setTimeout(() => {
-      confetti.reset();
-    }, 7000);
-  };
-
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentTime(dayjs());
@@ -144,22 +130,6 @@ function TimeCalculator() {
           remainingMinutes > 0
             ? `${remainingHours} hours ${remainingMins} minutes`
             : "0 hours 0 minutes (Completed!)";
-
-        const firstBreakMinutes =
-          firstBreak.getHours() * 60 + firstBreak.getMinutes();
-        const requiredHours = Math.floor(workTimeInMinutes / 60);
-        const requiredMinutes = workTimeInMinutes % 60;
-
-        // Trigger confetti when work hours are completed
-        if (
-          (completedHours > requiredHours ||
-            (completedHours === requiredHours &&
-              completedMinutes >= requiredMinutes)) &&
-          firstBreakMinutes > 0 &&
-          breaks.length == 0
-        ) {
-          triggerConfetti();
-        }
       }
 
       return {
@@ -172,8 +142,7 @@ function TimeCalculator() {
     arrivalTime,
     calculateTotalBreakMinutes,
     currentTime,
-    firstBreak,
-    breaks.length,
+
     getWorkTimeInMinutes,
   ]);
 
@@ -225,13 +194,35 @@ function TimeCalculator() {
   return (
     <Background>
       <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10">
-        {breaks.length === 0 && (
+        {/* {breaks.length === 0 && (
           <div>
             <h1 className="text-6xl font-bold">
               <AnimatedTimeDisplay currentTime={currentTime} />
             </h1>
           </div>
-        )}
+        )} */}
+
+        {/* Feature Announcement Banner */}
+        <Link
+          href="/changelog"
+          className="group max-w-2xl w-full bg-gradient-to-r from-cyan-900/30 to-blue-900/30 backdrop-blur-sm border border-cyan-700/30 rounded-2xl p-4 hover:from-cyan-900/40 hover:to-blue-900/40 transition-all duration-300 cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
+                <span className="text-xl">✨</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-cyan-200 group-hover:text-cyan-100">
+                New Feature: Time saved locally!
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Your data now persists across refreshes. Click to learn more →
+              </p>
+            </div>
+          </div>
+        </Link>
         <div className="flex flex-col gap-6 w-full max-w-2xl">
           {/* Settings Button */}
           <div className="flex justify-end">
@@ -442,20 +433,23 @@ function TimeCalculator() {
           </div>
         </div>
 
-        {completionTime && timeCompleted && (
-          <div className="space-y-2">
-            <h1 className="text-2xl text-center font-bold text-white">
-              Work Time Completes at: {completionTime}
-            </h1>
-            <h3 className="text-md text-center font-semibold text-gray-400">
-              Total work time you have completed till now: {timeCompleted}
-            </h3>
-            <h3 className="text-md text-center font-semibold text-green-400">
-              Remaining work time: {timeRemaining}
-            </h3>
-          </div>
-        )}
-
+        {/* Calculation Results - Only show if arrival time is set */}
+        {arrivalTime &&
+          (arrivalTime.getHours() !== 0 || arrivalTime.getMinutes() !== 0) &&
+          completionTime &&
+          timeCompleted && (
+            <div className="space-y-2">
+              <h1 className="text-2xl text-center font-bold text-white">
+                Work Time Completes at: {completionTime}
+              </h1>
+              <h3 className="text-md text-center font-semibold text-gray-400">
+                Total work time you have completed till now: {timeCompleted}
+              </h3>
+              <h3 className="text-md text-center font-semibold text-green-400">
+                Remaining work time: {timeRemaining}
+              </h3>
+            </div>
+          )}
         <div className="absolute bottom-6 text-white">
           Developed with ❤️‍🔥 by{" "}
           <Link

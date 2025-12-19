@@ -27,7 +27,7 @@ const Background = ({ children }) => {
     <>
       <div
         className={cn(
-          "fixed inset-0 transition-color delay-100 duration-700 opacity-25",
+          "fixed inset-0 transition-color delay-100 duration-700 opacity-25 pointer-events-none",
           {
             "bg-purple-300": currentFramework === "qwik",
             "bg-sky-300": currentFramework === "safari",
@@ -42,7 +42,7 @@ const Background = ({ children }) => {
         )}
       />
       <div
-        className="fixed inset-0 opacity-30"
+        className="fixed inset-0 opacity-30 pointer-events-none"
         style={{
           backgroundImage: `url(${assets.square})`,
           backgroundSize: "30px",
@@ -53,18 +53,18 @@ const Background = ({ children }) => {
         height={1200}
         role="presentation"
         alt="gradiant background"
-        className="fixed inset-0 w-screen h-screen object-cover"
+        className="fixed inset-0 w-screen h-screen object-cover pointer-events-none"
         src={assets.gradient}
       />
 
       <div
         className={cn(
-          "bg-black fixed inset-0 transition-opacity duration-[1500ms]",
+          "bg-black fixed inset-0 transition-opacity duration-[1500ms] pointer-events-none",
           !showBackground ? "opacity-100" : "opacity-0"
         )}
       ></div>
 
-      <div className="max-w-7xl  mx-auto">{children}</div>
+      {children}
     </>
   );
 };
