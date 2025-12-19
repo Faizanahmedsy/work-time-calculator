@@ -193,7 +193,7 @@ function TimeCalculator() {
 
   return (
     <Background>
-      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10 max-w-lg mx-auto">
+      <div className="flex flex-col h-screen justify-center items-center relative z-10 leading-5 tracking-wider gap-10 max-w-xl mx-auto">
         {/* {breaks.length === 0 && (
           <div>
             <h1 className="text-6xl font-bold">

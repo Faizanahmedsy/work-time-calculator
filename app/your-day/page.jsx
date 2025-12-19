@@ -143,12 +143,7 @@ export default function YourDayPage() {
   // Sync timer data to work hours - ONE TIME ONLY as default value
   React.useEffect(() => {
     // Only sync once when page first loads with timer data
-    if (
-      arrivalTime &&
-      mounted &&
-      !hasInitializedFromTimer &&
-      workStart === "09:00"
-    ) {
+    if (arrivalTime && mounted && !hasInitializedFromTimer) {
       // Convert arrival time to HH:mm format with 5-minute intervals
       const hours = arrivalTime.getHours().toString().padStart(2, "0");
       const rawMinutes = arrivalTime.getMinutes();
@@ -170,7 +165,7 @@ export default function YourDayPage() {
       setWorkStart(arrivalTimeStr);
       setHasInitializedFromTimer(true); // Mark as initialized
     }
-  }, [arrivalTime, mounted, hasInitializedFromTimer, workStart, setWorkStart]);
+  }, [arrivalTime, mounted, hasInitializedFromTimer, setWorkStart]);
 
   const [draftEvents, setDraftEvents] = React.useState([
     {

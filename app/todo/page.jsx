@@ -1,3 +1,5 @@
+"use client";
+
 import TodoApp from "@/components/TodoApp";
 import React from "react";
 
