@@ -360,7 +360,7 @@ export default function YourDayPage() {
   return (
     <Background>
       <div className="relative z-10 min-h-screen pt-20 pb-10 px-6">
-        <div className="max-w-[1600px] mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>

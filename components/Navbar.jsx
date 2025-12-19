@@ -58,7 +58,6 @@ export default function Navbar() {
           <NavLink href="/">Timer</NavLink>
           <NavLink href="/your-day">Your Day</NavLink>
           <NavLink href="/kanban">Kanban</NavLink>
-          <NavLink href="/home">Home</NavLink>
           <NavLink href="/changelog">Changelog</NavLink>
         </div>
       </div>
