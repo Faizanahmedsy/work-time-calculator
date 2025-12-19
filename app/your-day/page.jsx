@@ -181,7 +181,14 @@ export default function YourDayPage() {
     const validDrafts = draftEvents.filter(
       (d) => d.title && d.startTime && d.endTime
     );
-    if (validDrafts.length === 0) return;
+    if (validDrafts.length === 0) {
+      toast({
+        title: "No events to add",
+        description: "Please fill in at least one event with title and times.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const colors = {
       task: "bg-cyan-900/30 text-cyan-200 border-cyan-700/50",
@@ -202,42 +209,58 @@ export default function YourDayPage() {
       addEvent(event);
     });
 
-    if (isMultiple) {
-      setDraftEvents([
-        {
-          type: "task",
-          startTime: "11:00",
-          endTime: "12:00",
-          title: "",
-          color: "cyan",
-        },
-        {
-          type: "task",
-          startTime: "11:00",
-          endTime: "12:00",
-          title: "",
-          color: "cyan",
-        },
-        {
-          type: "task",
-          startTime: "11:00",
-          endTime: "12:00",
-          title: "",
-          color: "cyan",
-        },
-      ]);
-    } else {
-      setDraftEvents([
-        {
-          type: "task",
-          startTime: "11:00",
-          endTime: "12:00",
-          title: "",
-          color: "cyan",
-        },
-      ]);
-      setDialogOpen(false);
-    }
+    // Close dialog immediately
+    setDialogOpen(false);
+
+    // Show feedback
+    const eventCount = validDrafts.length;
+    toast({
+      title: `${eventCount} event${
+        eventCount > 1 ? "s" : ""
+      } added successfully!`,
+      description: `Your ${
+        eventCount === 1 ? "event has" : "events have"
+      } been added to your calendar.`,
+    });
+
+    // Reset form state after closing (prevents UI flicker)
+    setTimeout(() => {
+      if (isMultiple) {
+        setDraftEvents([
+          {
+            type: "task",
+            startTime: "11:00",
+            endTime: "12:00",
+            title: "",
+            color: "cyan",
+          },
+          {
+            type: "task",
+            startTime: "11:00",
+            endTime: "12:00",
+            title: "",
+            color: "cyan",
+          },
+          {
+            type: "task",
+            startTime: "11:00",
+            endTime: "12:00",
+            title: "",
+            color: "cyan",
+          },
+        ]);
+      } else {
+        setDraftEvents([
+          {
+            type: "task",
+            startTime: "11:00",
+            endTime: "12:00",
+            title: "",
+            color: "cyan",
+          },
+        ]);
+      }
+    }, 300);
   };
 
   // Copy EOD Report - Lists all tasks excluding breaks
@@ -535,21 +558,23 @@ export default function YourDayPage() {
                     Reset
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
+                <AlertDialogContent className="bg-gray-800/10 backdrop-blur-md border border-gray-700 text-white rounded-3xl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-gray-400">
+                    <AlertDialogTitle className="text-xl font-semibold">
+                      Are you sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-300">
                       This will clear all your calendar events and reset work
                       hours to default. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-gray-700 text-white border-gray-600">
+                    <AlertDialogCancel className="bg-gray-800/50 text-white border-gray-600 hover:bg-gray-700 hover:text-white rounded-xl">
                       Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={reset}
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-red-600 hover:bg-red-700 text-white border-none rounded-xl"
                     >
                       Reset Everything
                     </AlertDialogAction>
