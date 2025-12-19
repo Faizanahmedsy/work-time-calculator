@@ -58,6 +58,7 @@ import {
 } from "date-fns";
 
 import { useCalendarStore } from "@/store/useCalendarStore";
+import { ThemeTimePicker } from "@/components/global";
 
 import {
   DndContext,
@@ -73,41 +74,6 @@ import {
 } from "@dnd-kit/modifiers";
 import Background from "@/components/Background";
 import Link from "next/link";
-
-// Simple Time Picker Component
-function TimePicker({ value, onChange }) {
-  const [hours, minutes] = (value || "09:00").split(":");
-
-  return (
-    <div className="flex gap-2">
-      <Input
-        type="number"
-        min="0"
-        max="23"
-        value={hours}
-        onChange={(e) => {
-          const h = Math.min(23, Math.max(0, parseInt(e.target.value) || 0));
-          onChange(`${h.toString().padStart(2, "0")}:${minutes}`);
-        }}
-        className="w-20 bg-gray-800/50 border-gray-700 text-white"
-        placeholder="HH"
-      />
-      <span className="text-gray-400 self-center">:</span>
-      <Input
-        type="number"
-        min="0"
-        max="59"
-        value={minutes}
-        onChange={(e) => {
-          const m = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
-          onChange(`${hours}:${m.toString().padStart(2, "0")}`);
-        }}
-        className="w-20 bg-gray-800/50 border-gray-700 text-white"
-        placeholder="MM"
-      />
-    </div>
-  );
-}
 
 export default function YourDayPage() {
   const {
@@ -422,7 +388,7 @@ export default function YourDayPage() {
                     Add Event
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[800px] max-h-[90vh] bg-gray-800/95 border-gray-700 text-white backdrop-blur-xl overflow-y-auto">
+                <DialogContent className="sm:max-w-3xl max-h-[85vh] bg-gray-800/95 border-gray-700 text-white backdrop-blur-xl overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-2xl">
                       Add New Event
@@ -479,19 +445,12 @@ export default function YourDayPage() {
                       </Button>
                     </div>
 
-                    {/* Event Forms */}
-                    <div
-                      className={cn(
-                        "grid gap-4",
-                        isMultiple
-                          ? "grid-cols-1 md:grid-cols-2"
-                          : "grid-cols-1 max-w-xl mx-auto"
-                      )}
-                    >
+                    {/* Event Forms - Single Column List */}
+                    <div className="space-y-4">
                       {draftEvents.map((draft, index) => (
                         <div
                           key={index}
-                          className="relative space-y-4 p-6 rounded-2xl bg-gray-900/50 border border-gray-700/50"
+                          className="relative p-6 rounded-2xl bg-gray-900/50 border border-gray-700/50"
                         >
                           {isMultiple && draftEvents.length > 1 && (
                             <Button
@@ -504,55 +463,64 @@ export default function YourDayPage() {
                             </Button>
                           )}
 
-                          <div className="space-y-2">
-                            <Label>Event Title</Label>
-                            <Input
-                              placeholder="e.g. Design Review"
-                              className="bg-gray-800/50 border-gray-700 text-white"
-                              value={draft.title}
-                              onChange={(e) =>
-                                updateDraft(index, { title: e.target.value })
-                              }
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
+                          {/* Form Fields - Vertical List Layout */}
+                          <div className="space-y-4">
+                            {/* Title */}
                             <div className="space-y-2">
-                              <Label>Type</Label>
-                              <Select
-                                value={draft.type}
-                                onValueChange={(v) =>
-                                  v && updateDraft(index, { type: v })
-                                }
-                              >
-                                <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                                  <SelectItem value="task">Task</SelectItem>
-                                  <SelectItem value="break">Break</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Start Time</Label>
-                              <TimePicker
-                                value={draft.startTime}
-                                onChange={(v) =>
-                                  updateDraft(index, { startTime: v })
+                              <Label>Event Title</Label>
+                              <Input
+                                placeholder="e.g. Design Review"
+                                className="bg-gray-800/50 border-gray-700 text-white"
+                                value={draft.title}
+                                onChange={(e) =>
+                                  updateDraft(index, { title: e.target.value })
                                 }
                               />
                             </div>
-                          </div>
 
-                          <div className="space-y-2">
-                            <Label>End Time</Label>
-                            <TimePicker
-                              value={draft.endTime}
-                              onChange={(v) =>
-                                updateDraft(index, { endTime: v })
-                              }
-                            />
+                            {/* Type and Times - Compact Row */}
+                            <div className="grid grid-cols-3 gap-3">
+                              {/* Type */}
+                              <div className="space-y-2">
+                                <Label>Type</Label>
+                                <Select
+                                  value={draft.type}
+                                  onValueChange={(v) =>
+                                    v && updateDraft(index, { type: v })
+                                  }
+                                >
+                                  <SelectTrigger className="bg-gray-800/50 border-gray-700 text-white">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                                    <SelectItem value="task">Task</SelectItem>
+                                    <SelectItem value="break">Break</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Start Time */}
+                              <div className="space-y-2">
+                                <Label>Start</Label>
+                                <ThemeTimePicker
+                                  value={draft.startTime}
+                                  onChange={(v) =>
+                                    updateDraft(index, { startTime: v })
+                                  }
+                                />
+                              </div>
+
+                              {/* End Time */}
+                              <div className="space-y-2">
+                                <Label>End</Label>
+                                <ThemeTimePicker
+                                  value={draft.endTime}
+                                  onChange={(v) =>
+                                    updateDraft(index, { endTime: v })
+                                  }
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -560,10 +528,10 @@ export default function YourDayPage() {
                       {isMultiple && (
                         <Button
                           variant="outline"
-                          className="flex flex-col items-center justify-center gap-2 h-full min-h-[200px] rounded-2xl border-dashed border-2 bg-gray-900/20 hover:bg-gray-700/30 border-gray-700"
+                          className="flex items-center justify-center gap-2 w-full py-6 rounded-2xl border-dashed border-2 bg-gray-900/20 hover:bg-gray-700/30 border-gray-700"
                           onClick={addMoreForm}
                         >
-                          <Plus className="w-6 h-6 text-cyan-400" />
+                          <Plus className="w-5 h-5 text-cyan-400" />
                           <span className="font-semibold text-gray-400">
                             Add Another Event
                           </span>
@@ -601,11 +569,14 @@ export default function YourDayPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-gray-300">Start Time</Label>
-                    <TimePicker value={workStart} onChange={setWorkStart} />
+                    <ThemeTimePicker
+                      value={workStart}
+                      onChange={setWorkStart}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-gray-300">End Time</Label>
-                    <TimePicker value={workEnd} onChange={setWorkEnd} />
+                    <ThemeTimePicker value={workEnd} onChange={setWorkEnd} />
                   </div>
                 </CardContent>
               </Card>
@@ -696,16 +667,6 @@ export default function YourDayPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Back to Timer */}
-          <div className="text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-900/50 hover:bg-cyan-900 text-cyan-100 rounded-full font-medium transition-colors"
-            >
-              Back to Timer
-            </Link>
-          </div>
         </div>
       </div>
     </Background>
@@ -782,23 +743,43 @@ function DraggableEvent({
             setIsEditDialogOpen(true);
           }}
         >
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
-              {event.type === "task" ? (
-                <ListTodo className="w-3 h-3" />
-              ) : (
-                <Coffee className="w-3 h-3" />
-              )}
-              <span className="text-xs font-bold uppercase tracking-wider opacity-70">
-                {event.type}
-              </span>
-            </div>
-            <h3 className="text-sm font-bold leading-tight">{event.title}</h3>
-            <div className="flex items-center gap-1 text-[10px] font-medium opacity-60">
-              <Clock className="w-3 h-3" />
-              {formatTime12h(event.startTime)} - {formatTime12h(event.endTime)}
-            </div>
-          </div>
+          {(() => {
+            // Calculate duration in minutes
+            const start = parse(event.startTime, "HH:mm", new Date());
+            const end = parse(event.endTime, "HH:mm", new Date());
+            const durationMinutes = differenceInMinutes(end, start);
+            const isShortEvent = durationMinutes < 30;
+
+            return isShortEvent ? (
+              // Side-by-side layout for short events (<30 min)
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-xs font-bold leading-tight truncate flex-1">
+                  {event.title}
+                </h3>
+                <div className="flex items-center gap-0.5 text-[8px] font-medium opacity-60 whitespace-nowrap flex-shrink-0">
+                  <Clock className="w-2.5 h-2.5" />
+                  <span>
+                    {formatTime12h(event.startTime).replace(" ", "")} -{" "}
+                    {formatTime12h(event.endTime).replace(" ", "")}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              // Stacked layout for longer events (>=30 min)
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold leading-tight">
+                  {event.title}
+                </h3>
+                <div className="flex items-center gap-1 text-[9px] font-medium opacity-60 leading-tight">
+                  <Clock className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">
+                    {formatTime12h(event.startTime)} -{" "}
+                    {formatTime12h(event.endTime)}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </DialogTrigger>
 
@@ -840,7 +821,7 @@ function DraggableEvent({
             </div>
             <div className="space-y-2">
               <Label>Start Time</Label>
-              <TimePicker
+              <ThemeTimePicker
                 value={editDraft.startTime}
                 onChange={(v) => setEditDraft({ ...editDraft, startTime: v })}
               />
@@ -848,7 +829,7 @@ function DraggableEvent({
           </div>
           <div className="space-y-2">
             <Label>End Time</Label>
-            <TimePicker
+            <ThemeTimePicker
               value={editDraft.endTime}
               onChange={(v) => setEditDraft({ ...editDraft, endTime: v })}
             />

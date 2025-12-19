@@ -450,7 +450,7 @@ function TimeCalculator() {
               </h3>
             </div>
           )}
-        <div className="absolute bottom-6 text-white">
+        <div className="absolute bottom-6 text-white max-w-7xl mx-auto">
           Developed with ❤️‍🔥 by{" "}
           <Link
             href="https://faizansaiyed.vercel.app/v-2"
