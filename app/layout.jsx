@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <AntProvider>
-          <main className="flex flex-col min-h-screen">
+          <main className="flex flex-col min-h-screen selection:bg-cyan-950 selection:text-white">
             <Navbar />
             {children}
           </main>

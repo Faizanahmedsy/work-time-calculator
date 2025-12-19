@@ -56,17 +56,14 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-8">
           <NavLink href="/">Timer</NavLink>
+          <div className="relative">
+            <NavLink href="/your-day">Your Day</NavLink>
+            <span className="absolute -top-1.5 -right-7 text-[7px] font-bold bg-cyan-500 text-white px-1 py-0.5 rounded-full animate-pulse">
+              NEW
+            </span>
+          </div>
           <NavLink href="/kanban">Kanban</NavLink>
-          <NavLink href="/home">Home</NavLink>
-
-          <Link
-            href="https://kitty-kit.vercel.app/"
-            className="bg-slate-900   text-slate-300 rounded-full px-4 py-1 text-sm font-semibold flex justify-center items-center"
-            target="_blank"
-          >
-            Kitty
-            <SquareArrowOutUpRight className="h-4 w-4 ml-2" />
-          </Link>
+          <NavLink href="/changelog">Changelog</NavLink>
         </div>
       </div>
     </nav>
