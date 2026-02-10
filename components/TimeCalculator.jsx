@@ -203,7 +203,7 @@ function TimeCalculator() {
         )} */}
 
         {/* Feature Announcement Banner - Only show when no meaningful time input */}
-        {(!arrivalTime ||
+        {/* {(!arrivalTime ||
           (arrivalTime.getHours() === 0 && arrivalTime.getMinutes() === 0)) && (
           <Link
             href="/your-day"
@@ -237,7 +237,7 @@ function TimeCalculator() {
               </div>
             </div>
           </Link>
-        )}
+        )} */}
         <div className="flex flex-col gap-6 w-full">
           {/* Settings Button */}
           <div className="flex justify-end">

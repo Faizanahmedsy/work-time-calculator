@@ -3,6 +3,7 @@ import { Arrow } from "@radix-ui/react-dropdown-menu";
 import { ArrowRight, SquareArrowOutUpRight, Unlink2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import NoticeBanner from "./NoticeBanner";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -50,6 +51,7 @@ export default function Navbar() {
 
   return (
     <nav className="h-14 bg-transparent backdrop-blur-sm fixed w-full z-50">
+      <NoticeBanner />
       <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
         <div className="font-mono text-lg font-semibold text-zinc-100 dark:text-zinc-100">
           work-watch
