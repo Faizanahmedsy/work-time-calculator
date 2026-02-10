@@ -27,7 +27,7 @@ export default function NoticeBanner() {
             Time Wise
           </Link>
           , built by AI Engineer{" "}
-          <span className="whitespace-nowrap">Mitual Parmar</span>.
+          <span className="whitespace-nowrap">Mitul Parmar</span>.
         </p>
       </div>
     </div>
