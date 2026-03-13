@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "jest"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
@@ -49,6 +49,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
     "@rolldown/binding-linux-x64-gnu": "1.0.0-rc.9",
     "@types/node": "20.14.8",
     "@types/react": "18.3.3",

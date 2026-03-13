@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+// Migrated to Jest for better environment compatibility
+import { describe, it, expect } from "@jest/globals";
 import dayjs from "dayjs";
 import { 
   calculateTotalBreakMinutes, 
@@ -7,7 +8,8 @@ import {
   formatDuration 
 } from "./calculations";
 
-describe("Work Time Calculations", () => {
+describe("Work Time Calculations - Comprehensive Test Suite (100+ Scenarios)", () => {
+  
   describe("calculateTotalBreakMinutes", () => {
     it("should calculate duration mode correctly", () => {
       const firstBreak = new Date(2024, 0, 1, 0, 30); // 30 mins
@@ -51,16 +53,80 @@ describe("Work Time Calculations", () => {
     });
   });
 
-  describe("getCompletionTime", () => {
-    it("should calculate completion time correctly", () => {
-      const arrivalTime = dayjs("2024-01-01T09:00:00");
-      const totalBreakMinutes = 60;
-      const requiredWorkMinutes = 480; // 8 hours
+  describe("getCompletionTime - 100 Scenarios", () => {
+    const generateTestCases = () => {
+      const testCases = [];
       
-      const completion = getCompletionTime(arrivalTime, totalBreakMinutes, requiredWorkMinutes);
-      
-      // 9:00 + 8h + 1h = 18:00 (6:00 PM)
-      expect(completion.format("HH:mm")).toBe("18:00");
+      // Category 1: Standard Morning Starts (06:00 AM - 11:00 AM)
+      for (let h = 6; h <= 11; h++) {
+        for (let m of [0, 15, 30, 45]) {
+          testCases.push({
+            arrival: `2024-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`,
+            work: 495, // 8h 15m
+            breaks: 60, // 1h
+            expected: dayjs(`2024-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`).add(495 + 60, "minute").format("hh:mm A")
+          });
+        }
+      }
+
+      // Category 2: Afternoon & Late Starts (12:00 PM - 06:00 PM)
+      for (let h = 12; h <= 18; h++) {
+        testCases.push({
+          arrival: `2024-01-01T${String(h).padStart(2, '0')}:00:00`,
+          work: 255, // 4h 15m (Half Day)
+          breaks: 30, // 30m
+          expected: dayjs(`2024-01-01T${String(h).padStart(2, '0')}:00:00`).add(255 + 30, "minute").format("hh:mm A")
+        });
+      }
+
+      // Category 3: Varying Break Durations (0m to 180m)
+      for (let b = 0; b <= 180; b += 10) {
+        testCases.push({
+          arrival: `2024-01-01T09:00:00`,
+          work: 480, // 8h
+          breaks: b,
+          expected: dayjs(`2024-01-01T09:00:00`).add(480 + b, "minute").format("hh:mm A")
+        });
+      }
+
+      // Category 4: Crossing Midnight
+      for (let h = 20; h <= 23; h++) {
+        testCases.push({
+          arrival: `2024-01-01T${h}:30:00`,
+          work: 495, // 8h 15m
+          breaks: 45, // 45m
+          expected: dayjs(`2024-01-01T${h}:30:00`).add(495 + 45, "minute").format("hh:mm A")
+        });
+      }
+
+      // Category 5: Edge Cases (Midnight, Noon)
+      testCases.push({ arrival: `2024-01-01T00:00:00`, work: 480, breaks: 60, expected: "09:00 AM" });
+      testCases.push({ arrival: `2024-01-01T12:00:00`, work: 480, breaks: 60, expected: "09:00 PM" });
+      testCases.push({ arrival: `2024-01-01T11:59:00`, work: 1, breaks: 0, expected: "12:00 PM" }); // Mid-day check
+      testCases.push({ arrival: `2024-01-01T23:59:00`, work: 1, breaks: 0, expected: "12:00 AM" }); // Midnight check
+
+      // Ensure we hit exactly 100 or more
+      while (testCases.length < 100) {
+        const h = Math.floor(Math.random() * 24);
+        const m = Math.floor(Math.random() * 60);
+        const w = Math.floor(Math.random() * 600);
+        const b = Math.floor(Math.random() * 120);
+        testCases.push({
+          arrival: `2024-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`,
+          work: w,
+          breaks: b,
+          expected: dayjs(`2024-01-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`).add(w + b, "minute").format("hh:mm A")
+        });
+      }
+
+      return testCases;
+    };
+
+    const cases = generateTestCases();
+    
+    it.each(cases)('should calculate completion for $arrival with $work work and $breaks breaks as $expected', ({ arrival, work, breaks, expected }) => {
+      const completion = getCompletionTime(dayjs(arrival), breaks, work);
+      expect(completion.format("hh:mm A")).toBe(expected);
     });
   });
 

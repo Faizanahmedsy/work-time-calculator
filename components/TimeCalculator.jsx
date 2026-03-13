@@ -56,20 +56,16 @@ function TimeCalculator() {
     checkAndResetIfNewDay,
   } = useWorkTimeStore();
 
-  // Local UI state
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [showSettings, setShowSettings] = useState(false);
 
-  // Check and reset if new day on mount
   useEffect(() => {
     checkAndResetIfNewDay();
   }, [checkAndResetIfNewDay]);
 
-  // Ensure dates are properly initialized
   const safeArrivalTime = arrivalTime || undefined;
   const safeFirstBreak = firstBreak || new Date(0, 0, 0, 0, 0, 0);
 
-  // Work time based on selected mode
   const getWorkTimeInMinutes = useCallback(() => {
     if (workMode === "full") {
       return fullDayHours * 60 + fullDayMinutes;
@@ -161,24 +157,16 @@ function TimeCalculator() {
       <div className="relative z-10 min-h-screen pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Page Header */}
-          <div className="flex items-center justify-between border-b border-white/5 pb-6">
-            <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Timer className="w-8 h-8 text-cyan-400" />
-              work-watch
-            </h1>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <div className="text-right">
-                <div className="text-xl font-bold text-white tracking-tight">
-                  <AnimatedTimeDisplay currentTime={currentTime} />
-                </div>
-              </div>
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => setShowSettings(true)}
-                className="bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700/40 rounded-full"
+                className="bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700/40 rounded-full w-full px-4"
               >
                 <Settings className="h-5 w-5" />
+                Settings
               </Button>
             </div>
           </div>
@@ -193,7 +181,6 @@ function TimeCalculator() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 flex-1 overflow-y-auto pt-4">
-                {/* Arrival Time */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm text-gray-400">
@@ -211,7 +198,6 @@ function TimeCalculator() {
                   </div>
                 </div>
 
-                {/* Work Mode */}
                 <div className="space-y-3">
                   <Label className="text-sm text-gray-400">Work mode</Label>
                   <RadioGroup
@@ -260,7 +246,7 @@ function TimeCalculator() {
                   Break management
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 flex-1 flex flex-col overflow-hidden">
+              <CardContent className="space-y-4 flex-1 flex flex-col overflow-hidden pb-6">
                 <div className="flex items-center justify-between p-1 bg-white/5 rounded-xl border border-white/5">
                   <button
                     onClick={() => setBreakMode("duration")}
@@ -289,14 +275,19 @@ function TimeCalculator() {
                 <div className="flex-1 overflow-hidden flex flex-col gap-4">
                   {breakMode === "duration" ? (
                     <div className="space-y-4 h-full flex flex-col">
-                      <div className="flex gap-4 justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-xs text-gray-400">
-                          Default break
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">
+                            Default break
+                          </span>
+                          <TimePicker12hDemo
+                            date={safeFirstBreak}
+                            setDate={setFirstBreak}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600  text-right">
+                          Note: 12 AM = 0 hours duration
                         </span>
-                        <TimePicker12hDemo
-                          date={safeFirstBreak}
-                          setDate={setFirstBreak}
-                        />
                       </div>
 
                       <ScrollArea className="flex-1 w-full rounded-2xl bg-black/20 p-2 border border-white/5">
@@ -312,9 +303,7 @@ function TimeCalculator() {
                               <div className="flex items-center gap-2">
                                 <TimePicker12hDemo
                                   date={breakItem.duration}
-                                  setDate={(newBreakDuration) =>
-                                    updateBreak(breakItem.id, newBreakDuration)
-                                  }
+                                  setDate={(d) => updateBreak(breakItem.id, d)}
                                 />
                                 <button
                                   onClick={() => removeBreak(breakItem.id)}
@@ -342,9 +331,9 @@ function TimeCalculator() {
                           {breakRanges.map((range, index) => (
                             <div
                               key={range.id}
-                              className="flex flex-col gap-3 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5"
+                              className="flex flex-col gap-4 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5"
                             >
-                              <div className="flex justify-between items-center">
+                              <div className="flex justify-between items-center border-b border-white/5 pb-2">
                                 <span className="text-[10px] font-bold text-cyan-400/70 tracking-widest uppercase">
                                   Range {index + 1}
                                 </span>
@@ -355,17 +344,15 @@ function TimeCalculator() {
                                   <X size={14} />
                                 </button>
                               </div>
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                   <span className="text-[10px] text-gray-500 font-bold uppercase">
                                     Start
                                   </span>
                                   <TimePicker12hDemo
                                     date={range.start}
-                                    setDate={(newStart) =>
-                                      updateBreakRange(range.id, {
-                                        start: newStart,
-                                      })
+                                    setDate={(s) =>
+                                      updateBreakRange(range.id, { start: s })
                                     }
                                   />
                                 </div>
@@ -375,10 +362,8 @@ function TimeCalculator() {
                                   </span>
                                   <TimePicker12hDemo
                                     date={range.end}
-                                    setDate={(newEnd) =>
-                                      updateBreakRange(range.id, {
-                                        end: newEnd,
-                                      })
+                                    setDate={(e) =>
+                                      updateBreakRange(range.id, { end: e })
                                     }
                                   />
                                 </div>
@@ -420,7 +405,6 @@ function TimeCalculator() {
                       </h1>
                     </div>
 
-                    {/* Vertically stacked results */}
                     <div className="space-y-4 text-left">
                       <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-1">
                         <div className="text-[9px] font-bold text-gray-500 tracking-widest uppercase">
@@ -495,22 +479,22 @@ function TimeCalculator() {
             </Card>
           </div>
 
-          {/* Footer links */}
           <div className="flex justify-between items-center px-2">
             <Link
               href="https://github.com/Faizanahmedsy/work-time-calculator"
               target="_blank"
-              className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-2"
+              className="text-sm text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-2"
             >
-              Github Source
+              Developed with ❤️‍🔥 by Faizan <br />
+              Give a Star on Github
             </Link>
-            <div className="text-[10px] text-gray-700 text-right italic">
-              Verified calculation logic v1.0
+            <div className="text-sm text-gray-700 text-right">
+              ⚠️ Note: Please do not blindly trust this tool. The developer has
+              failed maths 7 times till now <br /> 🔃 Update: he has passed now
             </div>
           </div>
         </div>
 
-        {/* Settings Dialog */}
         <ThemeDialog
           open={showSettings}
           onOpenChange={setShowSettings}
