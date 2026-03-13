@@ -2,6 +2,7 @@ import AntProvider from "@/components/AntProvider";
 import Navbar from "@/components/Navbar";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Outfit({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
           <main className="flex flex-col min-h-screen selection:bg-cyan-950 selection:text-white">
             <Navbar />
             {children}
+            <Toaster />
           </main>
         </AntProvider>
       </body>
