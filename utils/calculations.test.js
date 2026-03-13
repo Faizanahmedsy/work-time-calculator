@@ -22,11 +22,11 @@ describe("Work Time Calculations - Comprehensive Test Suite (100+ Scenarios)", (
       expect(total).toBe(105); // 30 + 15 + 60 = 105
     });
 
-    it("should correctly handle 12-hour offsets in duration mode (e.g., 01:30 PM as 1.5h)", () => {
-      // 01:30 PM is 13:30 internally
-      const firstBreak = new Date(2024, 0, 1, 13, 30); 
+    it("should correctly handle durations like 01:30 as 90 minutes", () => {
+      // 01:30 as a duration
+      const firstBreak = new Date(2024, 0, 1, 1, 30); 
       const total = calculateTotalBreakMinutes("duration", firstBreak, [], []);
-      expect(total).toBe(90); // Should be 90 mins, not 810 mins
+      expect(total).toBe(90); 
     });
 
     it("should calculate range mode correctly", () => {
@@ -189,18 +189,18 @@ describe("Work Time Calculations - Comprehensive Test Suite (100+ Scenarios)", (
       expect(completion.format("hh:mm A")).toBe("10:35 PM");
     });
 
-    it("should correctly calculate 12:30 AM as a duration of 30 mins", () => {
-      // Internal date from 12h picker for 12:30 AM is 00:30
+    it("should correctly handle 00:30 as a duration of 30 mins", () => {
+      // Internal date for duration of 30 mins is 00:30
       const breakDate = new Date(2024, 0, 1, 0, 30);
       const total = calculateTotalBreakMinutes("duration", breakDate, [], []);
       expect(total).toBe(30);
     });
 
-    it("should correctly calculate 12:30 PM as a duration of 30 mins (normalization check)", () => {
-      // Internal date from 12h picker for 12:30 PM is 12:30
-      const breakDate = new Date(2024, 0, 1, 12, 30);
+    it("should correctly handle 05:30 as a duration of 5.5 hours", () => {
+      // Internal date for duration of 5h 30m is 05:30
+      const breakDate = new Date(2024, 0, 1, 5, 30);
       const total = calculateTotalBreakMinutes("duration", breakDate, [], []);
-      expect(total).toBe(30);
+      expect(total).toBe(330);
     });
   });
 });

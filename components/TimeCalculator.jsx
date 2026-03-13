@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { ScrollArea } from "./ui/scroll-area";
 import { ThemeDialog } from "./global/ThemeDialog";
 import { ThemeButton } from "./global/ThemeButton";
+import TimePickerDuration from "./shadcn-timepicker/timepicker-duration";
 import { useWorkTimeStore } from "@/store/workTimeStore";
 import {
   calculateTotalBreakMinutes,
@@ -280,14 +281,11 @@ function TimeCalculator() {
                           <span className="text-xs text-gray-400">
                             Default break
                           </span>
-                          <TimePicker12hDemo
-                            date={safeFirstBreak}
-                            setDate={setFirstBreak}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600  text-right">
-                          Note: 12 AM = 0 hours duration
-                        </span>
+                          <TimePickerDuration
+                          date={safeFirstBreak}
+                          setDate={setFirstBreak}
+                        />
+                      </div>
                       </div>
 
                       <ScrollArea className="flex-1 w-full rounded-2xl bg-black/20 p-2 border border-white/5">
@@ -301,9 +299,11 @@ function TimeCalculator() {
                                 Break {index + 2}
                               </span>
                               <div className="flex items-center gap-2">
-                                <TimePicker12hDemo
+                                <TimePickerDuration
                                   date={breakItem.duration}
-                                  setDate={(d) => updateBreak(breakItem.id, d)}
+                                  setDate={(newBreakDuration) =>
+                                    updateBreak(breakItem.id, newBreakDuration)
+                                  }
                                 />
                                 <button
                                   onClick={() => removeBreak(breakItem.id)}

@@ -13,10 +13,7 @@ export const calculateTotalBreakMinutes = (mode, firstBreak, additionalBreaks, b
   if (mode === "duration") {
     const getDurationMinutes = (date) => {
       if (!date) return 0;
-      // When using a 12h picker for duration, we treat both AM and PM as the same hour value
-      // 1 AM = 1 hour, 1 PM = 1 hour, 12 AM/PM = 0 hours (like 12:30 AM is 30 mins)
-      const h = date.getHours();
-      return (h % 12) * 60 + date.getMinutes();
+      return date.getHours() * 60 + date.getMinutes();
     };
 
     const firstBreakMinutes = getDurationMinutes(firstBreak);

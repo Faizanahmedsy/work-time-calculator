@@ -36,7 +36,7 @@ const initialState = {
   // User inputs
   arrivalTime: getTodayAtTime(9, 30),
   workMode: "full", // "full" or "half"
-  firstBreak: getTodayAtTime(13, 0),
+  firstBreak: getTodayAtTime(1, 0),
   breaks: [],
 
   // Custom work time settings
@@ -93,7 +93,7 @@ export const useWorkTimeStore = create(
       addBreak: () => {
         const newBreak = {
           id: Date.now(),
-          duration: getTodayAtTime(13, 30),
+          duration: getTodayAtTime(0, 30),
         };
         set((state) => ({
           breaks: [...state.breaks, newBreak],
