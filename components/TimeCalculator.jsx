@@ -1,6 +1,14 @@
 "use client";
 import dayjs from "dayjs";
-import { Settings, X, Clock, Calendar, Coffee, Timer, Building } from "lucide-react";
+import {
+  Settings,
+  X,
+  Clock,
+  Calendar,
+  Coffee,
+  Timer,
+  Building,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AnimatedTimeDisplay from "./AnimatedTime";
@@ -60,7 +68,7 @@ function TimeCalculator() {
 
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [showSettings, setShowSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState("manual"); // "manual" or "mewurk"
+  const [activeTab, setActiveTab] = useState("mewurk"); // "manual" or "mewurk"
 
   useEffect(() => {
     checkAndResetIfNewDay();
@@ -168,7 +176,7 @@ function TimeCalculator() {
                   "px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
                   activeTab === "manual"
                     ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "text-gray-400 hover:text-white"
+                    : "text-gray-400 hover:text-white",
                 )}
               >
                 <Timer size={16} />
@@ -180,7 +188,7 @@ function TimeCalculator() {
                   "px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
                   activeTab === "mewurk"
                     ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                    : "text-gray-400 hover:text-white"
+                    : "text-gray-400 hover:text-white",
                 )}
               >
                 <Building size={16} />
@@ -247,7 +255,10 @@ function TimeCalculator() {
                           onClick={() => setWorkMode("full")}
                         >
                           <RadioGroupItem value="full" id="full" />
-                          <Label htmlFor="full" className="text-xs cursor-pointer">
+                          <Label
+                            htmlFor="full"
+                            className="text-xs cursor-pointer"
+                          >
                             Full Day ({fullDayHours}h {fullDayMinutes}m)
                           </Label>
                         </div>
@@ -261,7 +272,10 @@ function TimeCalculator() {
                           onClick={() => setWorkMode("half")}
                         >
                           <RadioGroupItem value="half" id="half" />
-                          <Label htmlFor="half" className="text-xs cursor-pointer">
+                          <Label
+                            htmlFor="half"
+                            className="text-xs cursor-pointer"
+                          >
                             Half Day ({halfDayHours}h {halfDayMinutes}m)
                           </Label>
                         </div>
@@ -333,7 +347,10 @@ function TimeCalculator() {
                                     <TimePickerDuration
                                       date={breakItem.duration}
                                       setDate={(newBreakDuration) =>
-                                        updateBreak(breakItem.id, newBreakDuration)
+                                        updateBreak(
+                                          breakItem.id,
+                                          newBreakDuration,
+                                        )
                                       }
                                     />
                                     <button
@@ -383,7 +400,9 @@ function TimeCalculator() {
                                       <TimePicker12hDemo
                                         date={range.start}
                                         setDate={(s) =>
-                                          updateBreakRange(range.id, { start: s })
+                                          updateBreakRange(range.id, {
+                                            start: s,
+                                          })
                                         }
                                       />
                                     </div>
@@ -520,8 +539,9 @@ function TimeCalculator() {
                   Give a Star on Github
                 </Link>
                 <div className="text-sm text-gray-700 text-right">
-                  ⚠️ Note: Please do not blindly trust this tool. The developer has
-                  failed maths 7 times till now <br /> 🔃 Update: he has passed now
+                  ⚠️ Note: Please do not blindly trust this tool. The developer
+                  has failed maths 7 times till now <br /> 🔃 Update: he has
+                  passed now
                 </div>
               </div>
             </>
