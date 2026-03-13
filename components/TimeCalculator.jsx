@@ -91,7 +91,7 @@ function TimeCalculator() {
       const adjustedWorkTimeInMinutes = workTimeInMinutes + totalBreakMinutes;
       const completion = dayjs(arrivalTime).add(
         adjustedWorkTimeInMinutes,
-        "minute"
+        "minute",
       );
       return completion.format("hh:mm A");
     }
@@ -122,7 +122,7 @@ function TimeCalculator() {
         // Calculate time remaining
         const remainingMinutes = Math.max(
           0,
-          workTimeInMinutes - elapsedMinutes
+          workTimeInMinutes - elapsedMinutes,
         );
         const remainingHours = Math.floor(remainingMinutes / 60);
         const remainingMins = remainingMinutes % 60;
@@ -486,7 +486,7 @@ function TimeCalculator() {
       </div>
       <div className="absolute bottom-6 right-10 text-gray-400 text-sm">
         ⚠️ Note: Please do not blindly trust this tool. <br /> The developer has
-        failed maths 7 times till now
+        failed maths 7 times till now <br /> 🔃 Update: he has passed now
       </div>
     </Background>
   );
