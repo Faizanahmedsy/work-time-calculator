@@ -51,7 +51,7 @@ export default function Navbar() {
 
   return (
     <nav className="h-14 bg-transparent backdrop-blur-sm fixed w-full z-50">
-      <NoticeBanner />
+      {/* <NoticeBanner /> */}
       <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
         <div className="font-mono text-lg font-semibold text-zinc-100 dark:text-zinc-100">
           work-watch
