@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { TimePickerInput } from "./timepicker-input";
+import { TimePeriodSelect } from "./period-select";
 
-export function TimePickerDemo({ date, setDate, showSeconds = false }) {
+export function TimePicker12hDemo({ date, setDate }) {
+  const [period, setPeriod] = React.useState(date ? (date.getHours() >= 12 ? "PM" : "AM") : "AM");
+
   const minuteRef = React.useRef(null);
   const hourRef = React.useRef(null);
   const secondRef = React.useRef(null);
+  const periodRef = React.useRef(null);
+
+  // Sync period with date changes if they happen externally
+  React.useEffect(() => {
+    if (date) {
+      setPeriod(date.getHours() >= 12 ? "PM" : "AM");
+    }
+  }, [date]);
 
   return (
     <div className="flex items-end gap-2">
@@ -17,7 +27,8 @@ export function TimePickerDemo({ date, setDate, showSeconds = false }) {
           Hours
         </Label>
         <TimePickerInput
-          picker="hours"
+          picker="12hours"
+          period={period}
           date={date}
           setDate={setDate}
           ref={hourRef}
@@ -30,29 +41,26 @@ export function TimePickerDemo({ date, setDate, showSeconds = false }) {
         </Label>
         <TimePickerInput
           picker="minutes"
+          id="minutes12"
           date={date}
           setDate={setDate}
           ref={minuteRef}
           onLeftFocus={() => hourRef.current?.focus()}
-          onRightFocus={() => showSeconds ? secondRef.current?.focus() : null}
+          onRightFocus={() => secondRef.current?.focus()}
         />
       </div>
-      {showSeconds && (
-        <div className="grid gap-1 text-center">
-          <Label htmlFor="seconds" className="text-xs text-white/70">
-            Seconds
-          </Label>
-          <TimePickerInput
-            picker="seconds"
-            date={date}
-            setDate={setDate}
-            ref={secondRef}
-            onLeftFocus={() => minuteRef.current?.focus()}
-          />
-        </div>
-      )}
-      <div className="flex h-10 items-center">
-        <Clock className="ml-2 h-4 w-4 text-white/70" />
+      <div className="grid gap-1 text-center">
+        <Label htmlFor="period" className="text-xs text-white/70">
+          Period
+        </Label>
+        <TimePeriodSelect
+          period={period}
+          setPeriod={setPeriod}
+          date={date}
+          setDate={setDate}
+          ref={periodRef}
+          onLeftFocus={() => minuteRef.current?.focus()}
+        />
       </div>
     </div>
   );

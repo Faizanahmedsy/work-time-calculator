@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AnimatedTimeDisplay from "./AnimatedTime";
 import Background from "./Background";
-import { TimePickerDemo } from "./shadcn-timepicker/timepicker-demo";
+import { TimePicker12hDemo } from "./shadcn-timepicker/timepicker-12h-demo";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -15,6 +15,12 @@ import { ScrollArea } from "./ui/scroll-area";
 import { ThemeDialog } from "./global/ThemeDialog";
 import { ThemeButton } from "./global/ThemeButton";
 import { useWorkTimeStore } from "@/store/workTimeStore";
+import { 
+  calculateTotalBreakMinutes, 
+  getCompletionTime, 
+  getTimeStatus, 
+  formatDuration 
+} from "@/utils/calculations";
 
 function TimeCalculator() {
   // Zustand store
@@ -23,6 +29,8 @@ function TimeCalculator() {
     workMode,
     firstBreak,
     breaks,
+    breakMode,
+    breakRanges,
     fullDayHours,
     fullDayMinutes,
     halfDayHours,
@@ -36,6 +44,10 @@ function TimeCalculator() {
     addBreak,
     updateBreak,
     removeBreak,
+    setBreakMode,
+    addBreakRange,
+    updateBreakRange,
+    removeBreakRange,
     setFullDayTime,
     setHalfDayTime,
     setCalculationResults,
@@ -72,104 +84,56 @@ function TimeCalculator() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const calculateTotalBreakMinutes = useCallback(() => {
-    const firstBreakMinutes =
-      firstBreak.getHours() * 60 + firstBreak.getMinutes();
-    const additionalBreaksMinutes = breaks.reduce((total, breakItem) => {
-      return (
-        total +
-        (breakItem.duration.getHours() * 60 + breakItem.duration.getMinutes())
-      );
-    }, 0);
-    return firstBreakMinutes + additionalBreaksMinutes;
-  }, [firstBreak, breaks]);
+  const calculateResults = useCallback(() => {
+    if (!arrivalTime) return;
 
-  const calculateCompletionTime = useCallback(() => {
-    if (arrivalTime) {
-      const totalBreakMinutes = calculateTotalBreakMinutes();
-      const workTimeInMinutes = getWorkTimeInMinutes();
-      const adjustedWorkTimeInMinutes = workTimeInMinutes + totalBreakMinutes;
-      const completion = dayjs(arrivalTime).add(
-        adjustedWorkTimeInMinutes,
-        "minute",
-      );
-      return completion.format("hh:mm A");
+    const workTimeInMinutes = getWorkTimeInMinutes();
+    const totalBreakMinutes = calculateTotalBreakMinutes(
+      breakMode,
+      firstBreak,
+      breaks,
+      breakRanges
+    );
+
+    const completion = getCompletionTime(
+      arrivalTime,
+      totalBreakMinutes,
+      workTimeInMinutes
+    );
+    
+    const { completedMinutes, remainingMinutes } = getTimeStatus(
+      arrivalTime,
+      currentTime,
+      totalBreakMinutes,
+      workTimeInMinutes
+    );
+
+    const timeCompletedFormatted = formatDuration(completedMinutes);
+    let timeRemainingFormatted = formatDuration(remainingMinutes);
+
+    if (remainingMinutes === 0) {
+      timeRemainingFormatted = "0 hours 0 minutes (Completed!)";
     }
-    return "";
-  }, [arrivalTime, calculateTotalBreakMinutes, getWorkTimeInMinutes]);
 
-  const calculateTimeCompletedAndRemaining = useCallback(() => {
-    if (arrivalTime) {
-      const totalBreakMinutes = calculateTotalBreakMinutes();
-      const elapsedMinutes =
-        currentTime.diff(arrivalTime, "minute") - totalBreakMinutes;
-      const workTimeInMinutes = getWorkTimeInMinutes();
-
-      let timeCompletedText;
-      let timeRemainingText;
-
-      // Calculate time completed
-      if (elapsedMinutes <= 0) {
-        timeCompletedText = "0 hours 0 minutes";
-        timeRemainingText = `${Math.floor(workTimeInMinutes / 60)} hours ${
-          workTimeInMinutes % 60
-        } minutes`;
-      } else {
-        const completedHours = Math.floor(elapsedMinutes / 60);
-        const completedMinutes = elapsedMinutes % 60;
-        timeCompletedText = `${completedHours} hours ${completedMinutes} minutes`;
-
-        // Calculate time remaining
-        const remainingMinutes = Math.max(
-          0,
-          workTimeInMinutes - elapsedMinutes,
-        );
-        const remainingHours = Math.floor(remainingMinutes / 60);
-        const remainingMins = remainingMinutes % 60;
-        timeRemainingText =
-          remainingMinutes > 0
-            ? `${remainingHours} hours ${remainingMins} minutes`
-            : "0 hours 0 minutes (Completed!)";
-      }
-
-      return {
-        timeCompleted: timeCompletedText,
-        timeRemaining: timeRemainingText,
-      };
-    }
-    return { timeCompleted: null, timeRemaining: null };
+    setCalculationResults({
+      completionTime: completion ? completion.format("hh:mm A") : "",
+      timeCompleted: timeCompletedFormatted,
+      timeRemaining: timeRemainingFormatted,
+    });
   }, [
     arrivalTime,
-    calculateTotalBreakMinutes,
+    breakMode,
+    firstBreak,
+    breaks,
+    breakRanges,
     currentTime,
-
     getWorkTimeInMinutes,
+    setCalculationResults,
   ]);
 
   useEffect(() => {
-    if (arrivalTime) {
-      const newCompletionTime = calculateCompletionTime();
-      const {
-        timeCompleted: newTimeCompleted,
-        timeRemaining: newTimeRemaining,
-      } = calculateTimeCompletedAndRemaining();
-
-      // Save results to store
-      setCalculationResults({
-        completionTime: newCompletionTime,
-        timeCompleted: newTimeCompleted,
-        timeRemaining: newTimeRemaining,
-      });
-    }
-  }, [
-    arrivalTime,
-    firstBreak,
-    breaks,
-    calculateCompletionTime,
-    calculateTimeCompletedAndRemaining,
-    currentTime,
-    setCalculationResults,
-  ]);
+    calculateResults();
+  }, [calculateResults]);
 
   const handleFullDayHoursChange = (e) => {
     const value = parseInt(e.target.value) || 0;
@@ -387,65 +351,142 @@ function TimeCalculator() {
           <div className="flex gap-4 justify-between items-center">
             <div className="font-medium text-white">
               At what time did you come to the office?{" "}
-              <div className="text-xs opacity-80">(24-hour time format)</div>
+              <div className="text-xs opacity-80">(12-hour format with AM/PM)</div>
             </div>
-            <TimePickerDemo
+            <TimePicker12hDemo
               date={safeArrivalTime}
               setDate={setArrivalTime}
-              showSeconds={false}
             />
           </div>
 
           <div className="flex gap-4 justify-between items-center">
-            <div className="font-medium text-white">First Break Duration</div>
-            <TimePickerDemo
-              date={safeFirstBreak}
-              setDate={setFirstBreak}
-              showMinutes={true}
-              showSeconds={false}
-            />
+            <div className="font-medium text-white">Break Mode</div>
+            <RadioGroup
+              value={breakMode}
+              onValueChange={setBreakMode}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="duration" id="duration" />
+                <Label htmlFor="duration" className="text-white">
+                  Duration
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="range" id="range" />
+                <Label htmlFor="range" className="text-white">
+                  Range (IN/OUT)
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
-          <div className="space-y-4">
-            {breaks.length > 0 && (
-              <ScrollArea className="h-64 w-full rounded-2xl p-4 bg-transparent backdrop-blur-sm">
-                <div className="space-y-3">
-                  {breaks.map((breakItem, index) => (
+          {breakMode === "duration" ? (
+            <>
+              <div className="flex gap-4 justify-between items-center">
+                <div className="font-medium text-white">First Break Duration</div>
+                <TimePicker12hDemo
+                  date={safeFirstBreak}
+                  setDate={setFirstBreak}
+                />
+              </div>
+
+              <div className="space-y-4">
+                {breaks.length > 0 && (
+                  <ScrollArea className="h-48 w-full rounded-2xl p-4 bg-transparent backdrop-blur-sm">
+                    <div className="space-y-3">
+                      {breaks.map((breakItem, index) => (
+                        <div
+                          key={breakItem.id}
+                          className="flex items-center justify-between gap-3 bg-transparent backdrop-blur-sm p-3 rounded-lg"
+                        >
+                          <span className="text-sm font-medium text-white">
+                            Break {index + 2}
+                          </span>
+                          <div className="flex gap-4">
+                            <TimePicker12hDemo
+                              date={breakItem.duration}
+                              setDate={(newBreakDuration) =>
+                                updateBreak(breakItem.id, newBreakDuration)
+                              }
+                            />
+                            <button
+                              onClick={() => removeBreak(breakItem.id)}
+                              className="text-red-500 hover:text-red-400 transition-colors duration-200"
+                            >
+                              <X size={20} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+
+                <div className="flex justify-end">
+                  <Button onClick={addBreak} className="rounded-full">
+                    Add Break
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <ScrollArea className={`${breakRanges.length > 0 ? "h-64" : "h-auto"} w-full rounded-2xl p-4 bg-transparent backdrop-blur-sm`}>
+                <div className="space-y-6">
+                  {breakRanges.map((range, index) => (
                     <div
-                      key={breakItem.id}
-                      className="flex items-center justify-between gap-3 bg-transparent backdrop-blur-sm p-3 rounded-lg"
+                      key={range.id}
+                      className="flex flex-col gap-3 bg-gray-800/20 backdrop-blur-sm p-4 rounded-xl border border-white/5"
                     >
-                      <span className="text-sm font-medium text-white">
-                        Break {index + 2}
-                      </span>
-                      <div className="flex gap-4">
-                        <TimePickerDemo
-                          date={breakItem.duration}
-                          setDate={(newBreakDuration) =>
-                            updateBreak(breakItem.id, newBreakDuration)
-                          }
-                          showMinutes={true}
-                          showSeconds={false}
-                        />
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-cyan-400">
+                          Break Range {index + 1}
+                        </span>
                         <button
-                          onClick={() => removeBreak(breakItem.id)}
+                          onClick={() => removeBreakRange(range.id)}
                           className="text-red-500 hover:text-red-400 transition-colors duration-200"
                         >
-                          <X size={20} />
+                          <X size={18} />
                         </button>
+                      </div>
+                      <div className="flex gap-4 items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] uppercase text-gray-400 font-bold ml-1">OUT (Break Start)</span>
+                          <TimePicker12hDemo
+                            date={range.start}
+                            setDate={(newStart) =>
+                              updateBreakRange(range.id, { start: newStart })
+                            }
+                          />
+                        </div>
+                        <div className="h-px bg-gray-600 w-4 mt-4"></div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] uppercase text-gray-400 font-bold ml-1">IN (Break End)</span>
+                          <TimePicker12hDemo
+                            date={range.end}
+                            setDate={(newEnd) =>
+                              updateBreakRange(range.id, { end: newEnd })
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
+                  {breakRanges.length === 0 && (
+                    <div className="text-center py-8 text-gray-500 text-sm italic">
+                      No break ranges added yet.
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
-            )}
-
-            <div className="flex justify-end">
-              <Button onClick={addBreak} className="rounded-full">
-                Add Break
-              </Button>
+              <div className="flex justify-end">
+                <Button onClick={addBreakRange} className="rounded-full">
+                  Add Break Range
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Calculation Results - Only show if arrival time is set */}

@@ -44,6 +44,10 @@ const initialState = {
   timeCompleted: null,
   timeRemaining: null,
 
+  // Break input mode
+  breakMode: "duration", // "duration" or "range"
+  breakRanges: [],
+
   // Metadata
   lastUpdated: new Date().toISOString(),
 };
@@ -143,6 +147,55 @@ export const useWorkTimeStore = create(
       },
 
       /**
+       * Set break mode
+       * @param {string} mode - "duration" or "range"
+       */
+      setBreakMode: (mode) => {
+        set({ breakMode: mode, lastUpdated: new Date().toISOString() });
+      },
+
+      /**
+       * Add a new break range
+       */
+      addBreakRange: () => {
+        const now = new Date();
+        const newRange = {
+          id: Date.now(),
+          start: new Date(now.setHours(13, 0, 0, 0)), // Default 1 PM
+          end: new Date(now.setHours(13, 30, 0, 0)), // Default 1:30 PM
+        };
+        set((state) => ({
+          breakRanges: [...state.breakRanges, newRange],
+          lastUpdated: new Date().toISOString(),
+        }));
+      },
+
+      /**
+       * Update a break range
+       * @param {number} id - Range ID
+       * @param {object} updates - { start, end }
+       */
+      updateBreakRange: (id, updates) => {
+        set((state) => ({
+          breakRanges: state.breakRanges.map((range) =>
+            range.id === id ? { ...range, ...updates } : range
+          ),
+          lastUpdated: new Date().toISOString(),
+        }));
+      },
+
+      /**
+       * Remove a break range
+       * @param {number} id - Range ID
+       */
+      removeBreakRange: (id) => {
+        set((state) => ({
+          breakRanges: state.breakRanges.filter((range) => range.id !== id),
+          lastUpdated: new Date().toISOString(),
+        }));
+      },
+
+      /**
        * Update calculated results
        * @param {object} results - Calculation results
        */
@@ -181,6 +234,8 @@ export const useWorkTimeStore = create(
           fullDayMinutes: currentState.fullDayMinutes,
           halfDayHours: currentState.halfDayHours,
           halfDayMinutes: currentState.halfDayMinutes,
+          // Preserve break mode preference
+          breakMode: currentState.breakMode,
           lastUpdated: new Date().toISOString(),
         });
       },
@@ -227,6 +282,16 @@ export const useWorkTimeStore = create(
             }));
           } else {
             state.breaks = [];
+          }
+
+          if (state.breakRanges && Array.isArray(state.breakRanges)) {
+            state.breakRanges = state.breakRanges.map((range) => ({
+              ...range,
+              start: range.start ? new Date(range.start) : new Date(),
+              end: range.end ? new Date(range.end) : new Date(),
+            }));
+          } else {
+            state.breakRanges = [];
           }
 
           return { state };
