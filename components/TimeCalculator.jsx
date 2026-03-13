@@ -14,13 +14,13 @@ import { ScrollArea } from "./ui/scroll-area";
 import { ThemeDialog } from "./global/ThemeDialog";
 import { ThemeButton } from "./global/ThemeButton";
 import { useWorkTimeStore } from "@/store/workTimeStore";
-import { 
-  calculateTotalBreakMinutes, 
-  getCompletionTime, 
-  getTimeStatus, 
-  formatDuration 
+import {
+  calculateTotalBreakMinutes,
+  getCompletionTime,
+  getTimeStatus,
+  formatDuration,
 } from "@/utils/calculations";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { cn } from "@/lib/utils";
 
 function TimeCalculator() {
@@ -93,20 +93,20 @@ function TimeCalculator() {
       breakMode,
       firstBreak,
       breaks,
-      breakRanges
+      breakRanges,
     );
 
     const completion = getCompletionTime(
       arrivalTime,
       totalBreakMinutes,
-      workTimeInMinutes
+      workTimeInMinutes,
     );
-    
+
     const { completedMinutes, remainingMinutes } = getTimeStatus(
       arrivalTime,
       currentTime,
       totalBreakMinutes,
-      workTimeInMinutes
+      workTimeInMinutes,
     );
 
     const timeCompletedFormatted = formatDuration(completedMinutes);
@@ -160,123 +160,139 @@ function TimeCalculator() {
     <Background>
       <div className="relative z-10 min-h-screen pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-8">
-          
-          {/* Page Header (Simplified) */}
+          {/* Page Header */}
           <div className="flex items-center justify-between border-b border-white/5 pb-6">
             <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
               <Timer className="w-8 h-8 text-cyan-400" />
               work-watch
             </h1>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowSettings(true)}
-              className="bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700/40 rounded-full"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-xl font-bold text-white tracking-tight">
+                  <AnimatedTimeDisplay currentTime={currentTime} />
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowSettings(true)}
+                className="bg-gray-800/50 border-gray-700 text-white hover:bg-gray-700/40 rounded-full"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            {/* Card 1: Work Mode, Arrival Time & Current Time */}
-            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 flex flex-col">
+            {/* Card 1: Shift config */}
+            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 h-[600px] flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-base flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-cyan-400" />
                   Shift config
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 flex-1 flex flex-col justify-between">
-                <div className="space-y-6">
-                  {/* Current Time Mini-Widget */}
-                  <div className="p-6 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 text-center">
-                    <div className="text-[10px] font-bold text-cyan-400 tracking-widest uppercase mb-1 opacity-70">Current time</div>
-                    <div className="text-4xl font-black text-white tracking-tight">
-                      <AnimatedTimeDisplay currentTime={currentTime} />
-                    </div>
-                    <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-tighter">
-                      {currentTime.format("dddd, MMM D")}
-                    </div>
+              <CardContent className="space-y-6 flex-1 overflow-y-auto pt-4">
+                {/* Arrival Time */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm text-gray-400">
+                      Arrival time
+                    </Label>
+                    <span className="text-[10px] text-gray-600 font-bold tracking-widest uppercase">
+                      12h format
+                    </span>
                   </div>
+                  <div className="flex justify-center py-8 bg-white/5 rounded-2xl border border-white/5">
+                    <TimePicker12hDemo
+                      date={safeArrivalTime}
+                      setDate={setArrivalTime}
+                    />
+                  </div>
+                </div>
 
-                  {/* Work Mode */}
-                  <div className="space-y-3">
-                    <Label className="text-sm text-gray-400">Work mode</Label>
-                    <RadioGroup
-                      value={workMode}
-                      onValueChange={setWorkMode}
-                      className="grid grid-cols-1 gap-2"
+                {/* Work Mode */}
+                <div className="space-y-3">
+                  <Label className="text-sm text-gray-400">Work mode</Label>
+                  <RadioGroup
+                    value={workMode}
+                    onValueChange={setWorkMode}
+                    className="grid grid-cols-1 gap-2"
+                  >
+                    <div
+                      className={cn(
+                        "flex items-center space-x-3 p-4 rounded-xl border transition-all cursor-pointer",
+                        workMode === "full"
+                          ? "bg-cyan-500/10 border-cyan-500/50 text-white"
+                          : "bg-transparent border-white/10 text-gray-400 hover:border-white/20",
+                      )}
+                      onClick={() => setWorkMode("full")}
                     >
-                      <div className={cn(
-                        "flex items-center space-x-3 p-2.5 rounded-xl border transition-all cursor-pointer",
-                        workMode === "full" ? "bg-cyan-500/10 border-cyan-500/50 text-white" : "bg-transparent border-white/10 text-gray-400 hover:border-white/20"
-                      )} onClick={() => setWorkMode("full")}>
-                        <RadioGroupItem value="full" id="full" />
-                        <Label htmlFor="full" className="text-xs cursor-pointer">Full Day ({fullDayHours}h {fullDayMinutes}m)</Label>
-                      </div>
-                      <div className={cn(
-                        "flex items-center space-x-3 p-2.5 rounded-xl border transition-all cursor-pointer",
-                        workMode === "half" ? "bg-cyan-500/10 border-cyan-500/50 text-white" : "bg-transparent border-white/10 text-gray-400 hover:border-white/20"
-                      )} onClick={() => setWorkMode("half")}>
-                        <RadioGroupItem value="half" id="half" />
-                        <Label htmlFor="half" className="text-xs cursor-pointer">Half Day ({halfDayHours}h {halfDayMinutes}m)</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Arrival Time */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm text-gray-400">Arrival time</Label>
-                      <span className="text-[10px] text-gray-600 font-bold tracking-widest uppercase">12h format</span>
+                      <RadioGroupItem value="full" id="full" />
+                      <Label htmlFor="full" className="text-xs cursor-pointer">
+                        Full Day ({fullDayHours}h {fullDayMinutes}m)
+                      </Label>
                     </div>
-                    <div className="flex justify-center py-4 bg-white/5 rounded-2xl border border-white/5">
-                      <TimePicker12hDemo
-                        date={safeArrivalTime}
-                        setDate={setArrivalTime}
-                      />
+                    <div
+                      className={cn(
+                        "flex items-center space-x-3 p-4 rounded-xl border transition-all cursor-pointer",
+                        workMode === "half"
+                          ? "bg-cyan-500/10 border-cyan-500/50 text-white"
+                          : "bg-transparent border-white/10 text-gray-400 hover:border-white/20",
+                      )}
+                      onClick={() => setWorkMode("half")}
+                    >
+                      <RadioGroupItem value="half" id="half" />
+                      <Label htmlFor="half" className="text-xs cursor-pointer">
+                        Half Day ({halfDayHours}h {halfDayMinutes}m)
+                      </Label>
                     </div>
-                  </div>
+                  </RadioGroup>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 2: Break Management (Single Card) */}
-            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 flex flex-col">
+            {/* Card 2: Break Management */}
+            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 h-[600px] flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-base flex items-center gap-2">
                   <Coffee className="w-4 h-4 text-orange-400" />
                   Break management
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 flex-1 flex flex-col">
+              <CardContent className="space-y-4 flex-1 flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between p-1 bg-white/5 rounded-xl border border-white/5">
-                  <button 
+                  <button
                     onClick={() => setBreakMode("duration")}
                     className={cn(
                       "flex-1 text-[10px] font-bold uppercase tracking-widest py-2 rounded-lg transition-all",
-                      breakMode === "duration" ? "bg-orange-500/20 text-orange-400" : "text-gray-500 hover:text-gray-300"
+                      breakMode === "duration"
+                        ? "bg-orange-500/20 text-orange-400"
+                        : "text-gray-500 hover:text-gray-300",
                     )}
                   >
                     Duration
                   </button>
-                  <button 
+                  <button
                     onClick={() => setBreakMode("range")}
                     className={cn(
                       "flex-1 text-[10px] font-bold uppercase tracking-widest py-2 rounded-lg transition-all",
-                      breakMode === "range" ? "bg-orange-500/20 text-orange-400" : "text-gray-500 hover:text-gray-300"
+                      breakMode === "range"
+                        ? "bg-orange-500/20 text-orange-400"
+                        : "text-gray-500 hover:text-gray-300",
                     )}
                   >
                     Range
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden flex flex-col gap-4">
                   {breakMode === "duration" ? (
                     <div className="space-y-4 h-full flex flex-col">
                       <div className="flex gap-4 justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-xs text-gray-400">Default break</span>
+                        <span className="text-xs text-gray-400">
+                          Default break
+                        </span>
                         <TimePicker12hDemo
                           date={safeFirstBreak}
                           setDate={setFirstBreak}
@@ -309,19 +325,14 @@ function TimeCalculator() {
                               </div>
                             </div>
                           ))}
-                          {breaks.length === 0 && (
-                            <div className="text-center py-6 text-[10px] text-gray-600 uppercase tracking-widest">
-                              No extra breaks
-                            </div>
-                          )}
                         </div>
                       </ScrollArea>
-                      <Button 
-                        onClick={addBreak} 
-                        variant="outline" 
-                        className="w-full text-xs font-bold uppercase tracking-wider rounded-xl border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 py-6 transition-all shadow-lg shadow-orange-500/5"
+                      <Button
+                        onClick={addBreak}
+                        variant="outline"
+                        className="w-full text-xs font-bold uppercase tracking-wider rounded-xl border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 py-6 transition-all"
                       >
-                         + Add another break
+                        + Add another break
                       </Button>
                     </div>
                   ) : (
@@ -331,10 +342,12 @@ function TimeCalculator() {
                           {breakRanges.map((range, index) => (
                             <div
                               key={range.id}
-                              className="flex flex-col gap-3 bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/5"
+                              className="flex flex-col gap-3 bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5"
                             >
                               <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-cyan-400/70 tracking-widest uppercase">Range {index + 1}</span>
+                                <span className="text-[10px] font-bold text-cyan-400/70 tracking-widest uppercase">
+                                  Range {index + 1}
+                                </span>
                                 <button
                                   onClick={() => removeBreakRange(range.id)}
                                   className="text-red-500/30 hover:text-red-400 transition-colors"
@@ -342,36 +355,44 @@ function TimeCalculator() {
                                   <X size={14} />
                                 </button>
                               </div>
-                              <div className="flex gap-2 items-center justify-between">
-                                <TimePicker12hDemo
-                                  date={range.start}
-                                  setDate={(newStart) =>
-                                    updateBreakRange(range.id, { start: newStart })
-                                  }
-                                />
-                                <div className="h-px bg-white/10 w-2"></div>
-                                <TimePicker12hDemo
-                                  date={range.end}
-                                  setDate={(newEnd) =>
-                                    updateBreakRange(range.id, { end: newEnd })
-                                  }
-                                />
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] text-gray-500 font-bold uppercase">
+                                    Start
+                                  </span>
+                                  <TimePicker12hDemo
+                                    date={range.start}
+                                    setDate={(newStart) =>
+                                      updateBreakRange(range.id, {
+                                        start: newStart,
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] text-gray-500 font-bold uppercase">
+                                    End
+                                  </span>
+                                  <TimePicker12hDemo
+                                    date={range.end}
+                                    setDate={(newEnd) =>
+                                      updateBreakRange(range.id, {
+                                        end: newEnd,
+                                      })
+                                    }
+                                  />
+                                </div>
                               </div>
                             </div>
                           ))}
-                          {breakRanges.length === 0 && (
-                            <div className="text-center py-10 text-[10px] text-gray-600 uppercase tracking-widest">
-                              No ranges added
-                            </div>
-                          )}
                         </div>
                       </ScrollArea>
-                      <Button 
-                        onClick={addBreakRange} 
-                        variant="outline" 
-                        className="w-full text-xs font-bold uppercase tracking-wider rounded-xl border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 py-6 transition-all shadow-lg shadow-cyan-500/5"
+                      <Button
+                        onClick={addBreakRange}
+                        variant="outline"
+                        className="w-full text-xs font-bold uppercase tracking-wider rounded-xl border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 py-6 transition-all"
                       >
-                         + Add break range
+                        + Add break range
                       </Button>
                     </div>
                   )}
@@ -380,65 +401,92 @@ function TimeCalculator() {
             </Card>
 
             {/* Card 3: Results */}
-            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 flex flex-col lg:col-span-1 md:col-span-2">
+            <Card className="bg-gray-800/30 backdrop-blur-md border-gray-700 shadow-xl rounded-3xl overflow-hidden border-t-white/10 h-[600px] flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-base flex items-center gap-2">
                   <Clock className="w-4 h-4 text-cyan-400" />
                   Work results
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-8 flex-1 flex flex-col justify-center">
+              <CardContent className="p-8 flex-1 flex flex-col">
                 {arrivalTime ? (
-                  <div className="space-y-10 text-center">
+                  <div className="space-y-10 text-center flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
-                      <div className="text-[10px] font-bold text-gray-500 tracking-widest">Work completion time</div>
-                      <h1 className="text-6xl font-black text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-500">
+                      <div className="text-[10px] font-bold text-gray-500 tracking-widest">
+                        Work completion time
+                      </div>
+                      <h1 className="text-6xl font-black text-white tracking-tight">
                         {completionTime}
                       </h1>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Vertically stacked results */}
+                    <div className="space-y-4 text-left">
                       <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                         <div className="text-[9px] font-bold text-gray-500 tracking-widest">Completed</div>
-                         <div className="text-lg font-bold text-white tracking-tight">{timeCompleted}</div>
+                        <div className="text-[9px] font-bold text-gray-500 tracking-widest uppercase">
+                          Completed
+                        </div>
+                        <div className="text-lg font-bold text-white tracking-tight">
+                          {timeCompleted}
+                        </div>
                       </div>
                       <div className="p-5 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 space-y-1">
-                         <div className="text-[9px] font-bold text-cyan-400 tracking-widest">Remaining</div>
-                         <div className="text-lg font-bold text-cyan-300 tracking-tight">{timeRemaining}</div>
+                        <div className="text-[9px] font-bold text-cyan-400 tracking-widest uppercase">
+                          Remaining
+                        </div>
+                        <div className="text-lg font-bold text-cyan-300 tracking-tight">
+                          {timeRemaining}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(6,182,212,0.5)]" style={{ 
-                          width: arrivalTime ? `${Math.min(100, (currentTime.diff(arrivalTime, 'minute') / getWorkTimeInMinutes()) * 100)}%` : '0%' 
-                        }}></div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-cyan-500 rounded-full transition-all duration-1000"
+                            style={{
+                              width: arrivalTime
+                                ? `${Math.min(100, (currentTime.diff(arrivalTime, "minute") / getWorkTimeInMinutes()) * 100)}%`
+                                : "0%",
+                            }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-[9px] font-medium text-gray-400">
+                          <span>
+                            Start: {dayjs(arrivalTime).format("hh:mm A")}
+                          </span>
+                          <span>Goal: {completionTime}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-[9px] font-medium text-gray-400 tracking-tight">
-                        <span>Start: {dayjs(arrivalTime).format('hh:mm A')}</span>
-                        <span>Goal: {completionTime}</span>
-                      </div>
-                    </div>
 
-                    <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[9px] font-bold text-gray-600 tracking-wider">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></div>
-                        System operational
-                      </div>
-                      <div className="text-[9px] font-medium text-gray-500">
-                        developed by <Link href="https://faizansaiyed.vercel.app/v-2" className="text-gray-400 hover:text-cyan-400 transition-colors" target="_blank">Faizan</Link>
+                      <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-gray-600 tracking-wider">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></div>
+                          System operational
+                        </div>
+                        <div className="text-[9px] font-medium text-gray-500">
+                          developed by{" "}
+                          <Link
+                            href="https://faizansaiyed.vercel.app/v-2"
+                            className="text-gray-400 hover:text-cyan-400 transition-colors"
+                            target="_blank"
+                          >
+                            Faizan
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-700/20 flex items-center justify-center text-gray-600">
-                       <Timer className="w-8 h-8" />
-                    </div>
+                  <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-30">
+                    <Timer className="w-12 h-12" />
                     <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-white">No arrival time</h3>
+                      <h3 className="text-lg font-bold text-white">
+                        No arrival time
+                      </h3>
                       <p className="text-gray-500 text-xs max-w-[180px]">
-                        Set your start time in the first card to see your results.
+                        Set your start time to see your results.
                       </p>
                     </div>
                   </div>
@@ -449,16 +497,16 @@ function TimeCalculator() {
 
           {/* Footer links */}
           <div className="flex justify-between items-center px-2">
-             <Link
-                href="https://github.com/Faizanahmedsy/work-time-calculator"
-                target="_blank"
-                className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-2"
-              >
-                Github Source
-              </Link>
-              <div className="text-[10px] text-gray-700 text-right italic">
-                Verified calculation logic v1.0
-              </div>
+            <Link
+              href="https://github.com/Faizanahmedsy/work-time-calculator"
+              target="_blank"
+              className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-2"
+            >
+              Github Source
+            </Link>
+            <div className="text-[10px] text-gray-700 text-right italic">
+              Verified calculation logic v1.0
+            </div>
           </div>
         </div>
 
@@ -469,7 +517,11 @@ function TimeCalculator() {
           title="Shift Settings"
           footer={
             <div className="flex gap-3 w-full">
-              <ThemeButton variant="outline" onClick={resetToDefaults} className="flex-1">
+              <ThemeButton
+                variant="outline"
+                onClick={resetToDefaults}
+                className="flex-1"
+              >
                 Reset
               </ThemeButton>
               <ThemeButton
@@ -483,42 +535,46 @@ function TimeCalculator() {
           }
         >
           <div className="space-y-6 py-4">
-             <div className="space-y-3">
-               <Label className="text-xs text-gray-400 uppercase font-bold tracking-widest px-1">Full shift</Label>
-               <div className="grid grid-cols-2 gap-3">
-                 <Input
-                   type="number"
-                   value={fullDayHours}
-                   onChange={handleFullDayHoursChange}
-                   className="bg-gray-900/50 border-gray-700 h-10 rounded-xl"
-                   placeholder="Hrs"
-                 />
-                 <Input
-                   type="number"
-                   value={fullDayMinutes}
-                   onChange={handleFullDayMinutesChange}
-                   className="bg-gray-900/50 border-gray-700 h-10 rounded-xl"
-                   placeholder="Min"
-                 />
-               </div>
-             </div>
-             <div className="space-y-3">
-               <Label className="text-xs text-gray-400 uppercase font-bold tracking-widest px-1">Half shift</Label>
-               <div className="grid grid-cols-2 gap-3">
-                 <Input
-                   type="number"
-                   value={halfDayHours}
-                   onChange={handleHalfDayHoursChange}
-                   className="bg-gray-900/50 border-gray-700 h-10 rounded-xl"
-                 />
-                 <Input
-                   type="number"
-                   value={halfDayMinutes}
-                   onChange={handleHalfDayMinutesChange}
-                   className="bg-gray-900/50 border-gray-700 h-10 rounded-xl"
-                 />
-               </div>
-             </div>
+            <div className="space-y-3">
+              <Label className="text-xs text-gray-400 uppercase font-bold tracking-widest px-1">
+                Full shift
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="number"
+                  value={fullDayHours}
+                  onChange={handleFullDayHoursChange}
+                  className="bg-gray-900 border-gray-700"
+                  placeholder="Hrs"
+                />
+                <Input
+                  type="number"
+                  value={fullDayMinutes}
+                  onChange={handleFullDayMinutesChange}
+                  className="bg-gray-900 border-gray-700"
+                  placeholder="Min"
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label className="text-xs text-gray-400 uppercase font-bold tracking-widest px-1">
+                Half shift
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="number"
+                  value={halfDayHours}
+                  onChange={handleHalfDayHoursChange}
+                  className="bg-gray-900 border-gray-700"
+                />
+                <Input
+                  type="number"
+                  value={halfDayMinutes}
+                  onChange={handleHalfDayMinutesChange}
+                  className="bg-gray-900 border-gray-700"
+                />
+              </div>
+            </div>
           </div>
         </ThemeDialog>
       </div>

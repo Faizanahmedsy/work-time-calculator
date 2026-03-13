@@ -20,6 +20,13 @@ describe("Work Time Calculations", () => {
       expect(total).toBe(105); // 30 + 15 + 60 = 105
     });
 
+    it("should correctly handle 12-hour offsets in duration mode (e.g., 01:30 PM as 1.5h)", () => {
+      // 01:30 PM is 13:30 internally
+      const firstBreak = new Date(2024, 0, 1, 13, 30); 
+      const total = calculateTotalBreakMinutes("duration", firstBreak, [], []);
+      expect(total).toBe(90); // Should be 90 mins, not 810 mins
+    });
+
     it("should calculate range mode correctly", () => {
       const breakRanges = [
         { 
@@ -89,6 +96,45 @@ describe("Work Time Calculations", () => {
       expect(formatDuration(65)).toBe("1 hours 5 minutes");
       expect(formatDuration(120)).toBe("2 hours 0 minutes");
       expect(formatDuration(0)).toBe("0 hours 0 minutes");
+    });
+  });
+
+  describe("Edge Case Scenarios (Aggressive Testing)", () => {
+    it("should handle start at 11:59 PM and finish next day", () => {
+      const arrival = dayjs("2024-01-01T23:59:00");
+      const required = 10; // 10 mins
+      const completion = getCompletionTime(arrival, 0, required);
+      expect(completion.format("YYYY-MM-DD HH:mm")).toBe("2024-01-02 00:09");
+    });
+
+    it("should handle a massive 24h+ duration (though unlikely)", () => {
+      const arrival = dayjs("2024-01-01T09:00:00");
+      const required = 1440; // 24 hours
+      const completion = getCompletionTime(arrival, 0, required);
+      expect(completion.format("hh:mm A")).toBe("09:00 AM");
+      expect(completion.date()).toBe(2);
+    });
+
+    it("should handle 12:50 PM Arrival + 8h 15m Work + 1h 30m Break = 10:35 PM", () => {
+      const arrival = dayjs("2024-01-01T12:50:00"); // 12:50 PM
+      const work = 495; // 8h 15m
+      const breaks = 90; // 1h 30m
+      const completion = getCompletionTime(arrival, breaks, work);
+      expect(completion.format("hh:mm A")).toBe("10:35 PM");
+    });
+
+    it("should correctly calculate 12:30 AM as a duration of 30 mins", () => {
+      // Internal date from 12h picker for 12:30 AM is 00:30
+      const breakDate = new Date(2024, 0, 1, 0, 30);
+      const total = calculateTotalBreakMinutes("duration", breakDate, [], []);
+      expect(total).toBe(30);
+    });
+
+    it("should correctly calculate 12:30 PM as a duration of 30 mins (normalization check)", () => {
+      // Internal date from 12h picker for 12:30 PM is 12:30
+      const breakDate = new Date(2024, 0, 1, 12, 30);
+      const total = calculateTotalBreakMinutes("duration", breakDate, [], []);
+      expect(total).toBe(30);
     });
   });
 });

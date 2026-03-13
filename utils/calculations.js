@@ -11,10 +11,17 @@ import dayjs from "dayjs";
  */
 export const calculateTotalBreakMinutes = (mode, firstBreak, additionalBreaks, breakRanges) => {
   if (mode === "duration") {
-    const firstBreakMinutes = firstBreak ? (firstBreak.getHours() * 60 + firstBreak.getMinutes()) : 0;
+    const getDurationMinutes = (date) => {
+      if (!date) return 0;
+      // When using a 12h picker for duration, we treat both AM and PM as the same hour value
+      // 1 AM = 1 hour, 1 PM = 1 hour, 12 AM/PM = 0 hours (like 12:30 AM is 30 mins)
+      const h = date.getHours();
+      return (h % 12) * 60 + date.getMinutes();
+    };
+
+    const firstBreakMinutes = getDurationMinutes(firstBreak);
     const additionalBreaksMinutes = (additionalBreaks || []).reduce((total, breakItem) => {
-      const duration = breakItem.duration;
-      return total + (duration ? (duration.getHours() * 60 + duration.getMinutes()) : 0);
+      return total + getDurationMinutes(breakItem.duration);
     }, 0);
     return firstBreakMinutes + additionalBreaksMinutes;
   } else {

@@ -219,10 +219,7 @@ export const useWorkTimeStore = create(
        */
       resetToDefaults: () => {
         set({
-          fullDayHours: 8,
-          fullDayMinutes: 15,
-          halfDayHours: 4,
-          halfDayMinutes: 15,
+          ...initialState,
           lastUpdated: new Date().toISOString(),
         });
       },

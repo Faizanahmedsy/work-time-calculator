@@ -171,7 +171,7 @@ export function convert12HourTo24Hour(hour, period) {
  */
 export function display12HourValue(hours) {
   if (hours === 0 || hours === 12) return "12";
-  if (hours >= 22) return `${hours - 12}`;
-  if (hours % 12 > 9) return `${hours}`;
-  return `0${hours % 12}`;
+  const h = hours % 12;
+  if (h > 9) return `${h}`;
+  return `0${h}`;
 }

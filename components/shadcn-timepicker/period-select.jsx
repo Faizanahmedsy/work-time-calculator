@@ -26,8 +26,9 @@ export const TimePeriodSelect = React.forwardRef(
        */
       if (date) {
         const tempDate = new Date(date);
-        const hours = display12HourValue(date.getHours());
-        setDate(setDateByType(tempDate, hours.toString(), "12hours", value));
+        const hours = date.getHours() % 12;
+        const normalizedHours = hours === 0 ? 12 : hours;
+        setDate(setDateByType(tempDate, normalizedHours.toString(), "12hours", value));
       }
     };
 
