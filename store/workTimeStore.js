@@ -26,11 +26,17 @@ const isToday = (storedDate) => {
 /**
  * Initial state for the work time calculator
  */
+const getTodayAtTime = (hours, minutes) => {
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+};
+
 const initialState = {
   // User inputs
-  arrivalTime: null,
+  arrivalTime: getTodayAtTime(9, 30),
   workMode: "full", // "full" or "half"
-  firstBreak: new Date(0, 0, 0, 0, 0, 0),
+  firstBreak: getTodayAtTime(13, 0),
   breaks: [],
 
   // Custom work time settings
@@ -87,7 +93,7 @@ export const useWorkTimeStore = create(
       addBreak: () => {
         const newBreak = {
           id: Date.now(),
-          duration: new Date(0, 0, 0, 0, 0, 0),
+          duration: getTodayAtTime(13, 30),
         };
         set((state) => ({
           breaks: [...state.breaks, newBreak],

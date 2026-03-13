@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { TimePickerInput } from "./timepicker-input";
+import TimePickerInput from "./timepicker-input";
 
 export function TimePickerDemo({ date, setDate, showSeconds = false }) {
   const minuteRef = React.useRef(null);
