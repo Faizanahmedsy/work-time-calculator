@@ -1,0 +1,33 @@
+{
+  "appId": "com.timetracker.app",
+  "appName": "Time Tracker",
+  "webDir": "android-export",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#3B82F6",
+      "showSpinner": true,
+      "spinnerColor": "#ffffff"
+    },
+    "Keyboard": {
+      "resize": "body",
+      "mode": "resize"
+    }
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": null,
+      "keystorePassword": null,
+      "keystoreAlias": null,
+      "keystoreAliasPassword": null,
+      "releaseType": "APK"
+    },
+    "signingOptions": {
+      "debugSigningConfig": "debug"
+    }
+  }
+}

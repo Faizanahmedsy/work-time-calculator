@@ -1,13 +1,27 @@
 {
   "name": "time-tracker",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Time Tracker - Track your work time efficiently",
+  "author": "Time Tracker Team <support@timetracker.com>",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "electron:dev": "concurrently \"pnpm dev\" \"sleep 3 && electron .\"",
+    "electron:build": "next build && electron-builder",
+    "electron:dist": "next build && electron-builder --linux deb",
+    "electron:dist-appimage": "next build && electron-builder --linux appimage",
+    "android:init": "cap init",
+    "android:add": "cap add android",
+    "android:sync": "./build-android.sh && cap sync android",
+    "android:open": "cap open android",
+    "build:android": "./build-android.sh && cap sync android",
+    "android:build-debug": "./build-android.sh && cap sync android && cd android && ./gradlew assembleDebug",
+    "android:build-release": "./build-android.sh && cap sync android && cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
@@ -50,11 +64,18 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-react": "^7.28.5",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
     "@rolldown/binding-linux-x64-gnu": "1.0.0-rc.9",
     "@types/node": "20.14.8",
     "@types/react": "18.3.3",
     "autoprefixer": "^10.0.1",
     "babel-jest": "^30.3.0",
+    "concurrently": "^9.1.2",
+    "electron": "^33.4.2",
+    "electron-builder": "^25.1.8",
+    "electron-squirrel-startup": "^1.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "jest": "^30.3.0",
@@ -62,5 +83,34 @@
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "vitest": "^4.1.0"
+  },
+  "build": {
+    "appId": "com.timetracker.app",
+    "productName": "Time Tracker",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      ".next/**/*",
+      "electron/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      ".next/standalone/**"
+    ],
+    "linux": {
+      "target": ["deb", "AppImage"],
+      "category": "Utility",
+      "icon": "public/icon.png"
+    },
+    "deb": {
+      "maintainer": "Time Tracker Team <support@timetracker.com>",
+      "depends": ["gconf2", "gconf-service"]
+    },
+    "appImage": {
+      "artifactName": "TimeTracker-${version}.${ext}"
+    },
+    "npmRebuild": false
   }
 }

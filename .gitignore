@@ -16,6 +16,22 @@
 # production
 /build
 
+# electron
+dist-electron/
+electron/preload.js
+
+# android
+android-export/
+android/app/build/
+android/.gradle/
+android/build/
+*.jks
+*.keystore
+
+# ios (if added later)
+ios/App/App.xcworkspace/
+ios/App/Pods/
+
 # misc
 .DS_Store
 *.pem
