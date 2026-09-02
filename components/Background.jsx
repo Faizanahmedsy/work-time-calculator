@@ -1,7 +1,6 @@
 import { assets } from "@/utils/assets";
 import { cn } from "@/utils/cn";
 import { frameworks } from "@/utils/frameworks";
-import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
 const Background = ({ children }) => {
@@ -48,13 +47,18 @@ const Background = ({ children }) => {
           backgroundSize: "30px",
         }}
       />
-      <Image
-        width={1200}
-        height={1200}
-        role="presentation"
-        alt="gradiant background"
-        className="fixed inset-0 w-screen h-screen object-cover pointer-events-none"
-        src={assets.gradient}
+      {/* Was a remote SVG through next/image; the optimizer rejected it and the
+          browser painted the alt text in the corner. A CSS gradient keeps the
+          same depth with nothing to fetch and nothing to fail. */}
+      <div
+        aria-hidden
+        className="fixed inset-0 w-screen h-screen pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(60% 50% at 20% 0%, rgba(99,102,241,0.16), transparent 70%)," +
+            "radial-gradient(50% 45% at 85% 15%, rgba(56,189,248,0.10), transparent 70%)," +
+            "radial-gradient(70% 60% at 50% 100%, rgba(0,0,0,0.55), transparent 70%)",
+        }}
       />
 
       <div
