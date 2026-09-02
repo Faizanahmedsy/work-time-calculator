@@ -8,7 +8,6 @@ import {
   Coffee,
   Timer,
   Building,
-  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -24,7 +23,6 @@ import { ThemeDialog } from "./global/ThemeDialog";
 import { ThemeButton } from "./global/ThemeButton";
 import TimePickerDuration from "./shadcn-timepicker/timepicker-duration";
 import MewurkLogs from "./MewurkLogs";
-import DailyReport from "./DailyReport";
 import { useWorkTimeStore } from "@/store/workTimeStore";
 import {
   calculateTotalBreakMinutes,
@@ -70,7 +68,7 @@ function TimeCalculator() {
 
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [showSettings, setShowSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState("mewurk"); // "manual" | "mewurk" | "daily-report"
+  const [activeTab, setActiveTab] = useState("mewurk"); // "manual" or "mewurk"
 
   useEffect(() => {
     checkAndResetIfNewDay();
@@ -168,12 +166,7 @@ function TimeCalculator() {
   return (
     <Background>
       <div className="relative z-10 min-h-screen pt-24 pb-12 px-6">
-        <div
-          className={cn(
-            "mx-auto space-y-8",
-            activeTab === "daily-report" ? "max-w-[1800px]" : "max-w-7xl",
-          )}
-        >
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex bg-gray-800/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/5 shadow-xl">
@@ -200,18 +193,6 @@ function TimeCalculator() {
               >
                 <Building size={16} />
                 Mewurk Logs
-              </button>
-              <button
-                onClick={() => setActiveTab("daily-report")}
-                className={cn(
-                  "px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                  activeTab === "daily-report"
-                    ? "bg-violet-500 text-white shadow-lg shadow-violet-500/20"
-                    : "text-gray-400 hover:text-white",
-                )}
-              >
-                <FileText size={16} />
-                Daily Report
               </button>
             </div>
 
@@ -564,13 +545,9 @@ function TimeCalculator() {
                 </div>
               </div>
             </>
-          ) : activeTab === "mewurk" ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <MewurkLogs />
-            </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <DailyReport />
+              <MewurkLogs />
             </div>
           )}
         </div>

@@ -67,6 +67,7 @@ export default function Navbar() {
           <NavLink href="/kanban">Kanban</NavLink>
           <NavLink href="/prompt-generator">Prompt Generator</NavLink>
           <NavLink href="/changelog">Changelog</NavLink>
+          <NavLink href="/daily-reports">Daily Report</NavLink>
         </div>
       </div>
     </nav>
