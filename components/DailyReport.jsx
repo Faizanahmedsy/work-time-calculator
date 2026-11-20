@@ -58,7 +58,10 @@ const STORAGE_KEY = "daily-report-entries";
  */
 const INK = "bg-[#0e1014]";
 const SHELL = "bg-[#151920]";
-const LINE = "border-[#272e3a]";
+const LINE = "border-[#242b36]";
+// a card lifted off the page: a hairline top highlight + a long soft shadow (no glow)
+const LIFT =
+  "shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_30px_60px_-34px_rgba(0,0,0,0.85)]";
 
 // Radix wraps ScrollArea content in a `display: table` div, which shrink-wraps to
 // the content width — that defeats `truncate` and forces horizontal overflow.
@@ -68,15 +71,16 @@ const cardClass = cn(
   SHELL,
   "border",
   LINE,
-  "rounded-xl flex flex-col overflow-hidden",
+  "rounded-[24px] flex flex-col overflow-hidden",
+  LIFT,
   "h-[calc(100vh-17rem)] min-h-[520px]",
 );
 const eyebrow =
   "text-[11px] font-semibold uppercase tracking-[0.1em] text-[#5b6473]";
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500/70";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60";
 const fieldClass =
-  "bg-[#0e1014] border-[#2d3542] text-[#e6e4e0] rounded-md h-9 text-[15px] focus:border-indigo-500 focus-visible:ring-0";
+  "bg-[#0e1014] border-[#2a313d] text-[#e6e4e0] rounded-xl h-10 text-[15px] transition-colors hover:border-[#363f4d] focus:border-indigo-500 focus-visible:ring-0";
 
 /** Ratio of logged to estimated, clamped for the meter. */
 function meterFor(actual, estimate) {
@@ -536,7 +540,8 @@ export default function DailyReport() {
             SHELL,
             "w-full max-w-sm border",
             LINE,
-            "rounded-xl overflow-hidden",
+            "rounded-[24px] overflow-hidden",
+            LIFT,
           )}
         >
           <div className={cn("px-6 py-5 border-b", LINE)}>
@@ -588,7 +593,7 @@ export default function DailyReport() {
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   className={cn(
-                    "absolute right-3 top-1/2 -translate-y-1/2 rounded text-[#5b6473] hover:text-[#e6e4e0]",
+                    "absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-[#5b6473] hover:text-[#e6e4e0]",
                     focusRing,
                   )}
                   onClick={() => setShowPassword(!showPassword)}
@@ -598,14 +603,14 @@ export default function DailyReport() {
               </div>
             </div>
             {error && (
-              <p className="text-sm text-amber-300 border border-amber-900/70 bg-amber-950/50 rounded-md px-3 py-2">
+              <p className="text-sm text-amber-300 border border-amber-900/70 bg-amber-950/50 rounded-xl px-3.5 py-2.5">
                 {error}
               </p>
             )}
             <Button
               type="submit"
               className={cn(
-                "w-full h-10 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-medium",
+                "w-full h-11 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors",
                 focusRing,
               )}
               disabled={isLoggingIn}
@@ -619,9 +624,9 @@ export default function DailyReport() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {error && (
-        <div className="rounded-lg border border-amber-900/70 bg-amber-950/50 px-4 py-2.5 text-[15px] text-amber-200">
+        <div className="rounded-2xl border border-amber-900/70 bg-amber-950/50 px-4 py-2.5 text-[15px] text-amber-200">
           {error}
         </div>
       )}
@@ -629,7 +634,7 @@ export default function DailyReport() {
       {/* OUTSTANDING — the balance you owe, and the day lines behind it */}
       {pendingDays.length > 0 && (
         <section
-          className={cn(SHELL, "border", LINE, "rounded-xl overflow-hidden")}
+          className={cn(SHELL, "border", LINE, "rounded-[24px] overflow-hidden", LIFT)}
         >
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
             <div
@@ -663,7 +668,7 @@ export default function DailyReport() {
 
             {/* Caps at ~3 rows, then scrolls: a long backlog must not push the
                 projects and composer off-screen. */}
-            <ul className="divide-y divide-[#272e3a] max-h-[13.5rem] overflow-y-auto overscroll-contain">
+            <ul className="p-2 space-y-1 max-h-[14.5rem] overflow-y-auto overscroll-contain">
               {pendingDays.map((day) => {
                 const isActive = day.date === reportKey;
                 const done = Math.min(
@@ -674,8 +679,10 @@ export default function DailyReport() {
                   <li
                     key={day.date}
                     className={cn(
-                      "flex items-center gap-4 px-5 py-3 transition-colors",
-                      isActive ? "bg-indigo-950/40" : "hover:bg-[#1e242e]",
+                      "flex items-center gap-4 rounded-2xl px-4 py-3 transition-colors",
+                      isActive
+                        ? "bg-indigo-500/[0.10] ring-1 ring-inset ring-indigo-400/25"
+                        : "hover:bg-white/[0.035]",
                     )}
                   >
                     <div className="w-20 shrink-0">
@@ -697,7 +704,7 @@ export default function DailyReport() {
                           {formatMinutes(day.pendingMinutes)} left
                         </span>
                       </div>
-                      <div className="h-1 rounded-full bg-[#0e1014] overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-[#0e1014] overflow-hidden">
                         <div
                           className="h-full rounded-full bg-emerald-500/80 transition-[width] duration-300"
                           style={{ width: `${done}%` }}
@@ -709,7 +716,7 @@ export default function DailyReport() {
                       size="sm"
                       onClick={() => handlePrefill(day)}
                       className={cn(
-                        "h-7 shrink-0 rounded-md text-sm font-medium border",
+                        "h-8 shrink-0 rounded-full px-3.5 text-sm font-medium border transition-colors",
                         focusRing,
                         isActive
                           ? "bg-indigo-600 hover:bg-indigo-500 border-transparent text-white"
@@ -726,7 +733,7 @@ export default function DailyReport() {
         </section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.3fr)_minmax(0,1fr)] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.3fr)_minmax(0,1fr)] gap-5">
         {/* PROJECTS */}
         <Card className={cardClass}>
           <div
@@ -747,7 +754,7 @@ export default function DailyReport() {
                 title="Sign out of Resource Management"
                 aria-label="Sign out of Resource Management"
                 className={cn(
-                  "flex items-center gap-1.5 rounded px-1.5 py-1 text-[11px] uppercase tracking-wide",
+                  "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] uppercase tracking-wide hover:bg-white/[0.05]",
                   "text-[#7b8494] hover:text-amber-300 transition-colors",
                   focusRing,
                 )}
@@ -781,7 +788,7 @@ export default function DailyReport() {
                   <Loader2 className="h-5 w-5 text-[#5b6473] animate-spin" />
                 </div>
               ) : projects.length ? (
-                <ul className="divide-y divide-[#1e242e]">
+                <ul className="p-2 space-y-1">
                   {projects.map((project) => {
                     const isActive = project.id === selectedProjectId;
                     return (
@@ -790,11 +797,11 @@ export default function DailyReport() {
                           onClick={() => setSelectedProjectId(project.id)}
                           aria-current={isActive ? "true" : undefined}
                           className={cn(
-                            "w-full text-left pl-4 pr-3 py-3 flex items-center gap-3 border-l-2 transition-colors",
+                            "w-full text-left px-3 py-2.5 flex items-center gap-3 rounded-xl transition-colors",
                             focusRing,
                             isActive
-                              ? "border-l-indigo-500 bg-indigo-950/40"
-                              : "border-l-transparent hover:bg-[#1e242e]",
+                              ? "bg-indigo-500/[0.12] ring-1 ring-inset ring-indigo-400/30"
+                              : "hover:bg-white/[0.04]",
                           )}
                         >
                           <span className="min-w-0 flex-1">
@@ -842,7 +849,7 @@ export default function DailyReport() {
               disabled={page <= 1 || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               className={cn(
-                "h-7 rounded-md text-sm text-[#8b93a3] hover:text-[#e6e4e0] disabled:opacity-30",
+                "h-8 rounded-full px-3 text-sm text-[#8b93a3] hover:text-[#e6e4e0] hover:bg-white/[0.05] disabled:opacity-30",
                 focusRing,
               )}
             >
@@ -857,7 +864,7 @@ export default function DailyReport() {
               disabled={loading || page >= (metadata?.totalPages ?? 1)}
               onClick={() => setPage((p) => p + 1)}
               className={cn(
-                "h-7 rounded-md text-sm text-[#8b93a3] hover:text-[#e6e4e0] disabled:opacity-30",
+                "h-8 rounded-full px-3 text-sm text-[#8b93a3] hover:text-[#e6e4e0] hover:bg-white/[0.05] disabled:opacity-30",
                 focusRing,
               )}
             >
@@ -893,7 +900,7 @@ export default function DailyReport() {
                   <Loader2 className="h-5 w-5 text-[#5b6473] animate-spin" />
                 </div>
               ) : milestones.length ? (
-                <ul className="divide-y divide-[#1e242e]">
+                <ul className="p-2 space-y-1">
                   {milestones.map((milestone, idx) => {
                     const isSelected = milestone.id === selectedMilestoneId;
                     const isExpanded = milestone.id === expandedMilestoneId;
@@ -914,17 +921,17 @@ export default function DailyReport() {
                           }}
                           aria-expanded={isExpanded}
                           className={cn(
-                            "w-full text-left pl-4 pr-3 py-3 flex items-start gap-3 border-l-2 transition-colors",
+                            "w-full text-left px-3 py-3 flex items-start gap-3 rounded-xl transition-colors",
                             focusRing,
                             isSelected
-                              ? "border-l-indigo-500 bg-indigo-950/40"
-                              : "border-l-transparent hover:bg-[#1e242e]",
+                              ? "bg-indigo-500/[0.12] ring-1 ring-inset ring-indigo-400/30"
+                              : "hover:bg-white/[0.04]",
                           )}
                         >
                           {/* orderNumber is a real sequence from the API, so it earns the gutter */}
                           <span
                             className={cn(
-                              "mt-0.5 h-5 w-5 shrink-0 rounded flex items-center justify-center text-[13px] tabular-nums",
+                              "mt-0.5 h-6 w-6 shrink-0 rounded-lg flex items-center justify-center text-[13px] tabular-nums",
                               isSelected
                                 ? "bg-indigo-600 text-white"
                                 : "bg-[#1e242e] text-[#8b93a3]",
@@ -957,7 +964,7 @@ export default function DailyReport() {
                               </span>
                             </span>
 
-                            <span className="mt-2 block h-1 rounded-full bg-[#0e1014] overflow-hidden">
+                            <span className="mt-2 block h-1.5 rounded-full bg-[#0e1014] overflow-hidden">
                               <span
                                 className={cn(
                                   "block h-full rounded-full transition-[width] duration-300",
@@ -995,7 +1002,7 @@ export default function DailyReport() {
                         </button>
 
                         {isExpanded && tasks.length > 0 && (
-                          <ul className={cn(INK, "border-t", LINE)}>
+                          <ul className="mt-1 mb-1 ml-6 pl-2 space-y-0.5 border-l border-[#262d39]">
                             {tasks.map((task) => {
                               const taskSelected = task.id === selectedTaskId;
                               return (
@@ -1010,11 +1017,11 @@ export default function DailyReport() {
                                     title={task.taskName}
                                     aria-pressed={taskSelected}
                                     className={cn(
-                                      "w-full text-left pl-11 pr-3 py-2 flex items-center gap-3 border-l-2 transition-colors",
+                                      "w-full text-left pl-3 pr-3 py-2 flex items-center gap-3 rounded-lg transition-colors",
                                       focusRing,
                                       taskSelected
-                                        ? "border-l-indigo-500 bg-indigo-950/50"
-                                        : "border-l-transparent hover:bg-[#1e242e]",
+                                        ? "bg-indigo-500/[0.14] ring-1 ring-inset ring-indigo-400/30"
+                                        : "hover:bg-white/[0.04]",
                                     )}
                                   >
                                     <span
@@ -1080,7 +1087,7 @@ export default function DailyReport() {
               onClick={handleCopyReport}
               disabled={!reportText}
               className={cn(
-                "h-7 rounded-md text-sm text-[#8b93a3] hover:text-[#e6e4e0] disabled:opacity-30",
+                "h-8 rounded-full px-3 text-sm text-[#8b93a3] hover:text-[#e6e4e0] hover:bg-white/[0.05] disabled:opacity-30",
                 focusRing,
               )}
             >
@@ -1090,7 +1097,7 @@ export default function DailyReport() {
           </div>
 
           <div className="p-4 space-y-3 flex-1 min-h-0 flex flex-col overflow-hidden">
-            <div className={cn("rounded-md border px-3 py-2.5", LINE, INK)}>
+            <div className={cn("rounded-2xl border px-4 py-3", LINE, INK)}>
               <p className={eyebrow}>Logging against</p>
               <p className="text-[15px] text-[#e6e4e0] truncate mt-1">
                 {selectedProject?.name || "No project selected"}
@@ -1183,7 +1190,7 @@ export default function DailyReport() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Progress, completed tasks, blockers…"
                 rows={3}
-                className="w-full bg-[#0e1014] border border-[#2d3542] text-[#e6e4e0] rounded-md p-2.5 text-[15px] resize-none focus:outline-none focus:border-indigo-500 placeholder:text-[#4c5462]"
+                className="w-full bg-[#0e1014] border border-[#2d3542] text-[#e6e4e0] rounded-xl p-3 text-[15px] resize-none transition-colors hover:border-[#363f4d] focus:outline-none focus:border-indigo-500 placeholder:text-[#4c5462]"
               />
             </div>
 
@@ -1191,7 +1198,7 @@ export default function DailyReport() {
               onClick={handleAddEntry}
               disabled={submitting}
               className={cn(
-                "w-full h-9 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-[15px] font-medium shrink-0",
+                "w-full h-11 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-[15px] font-medium shrink-0 transition-colors",
                 "disabled:opacity-60 disabled:cursor-not-allowed",
                 focusRing,
               )}
@@ -1213,7 +1220,7 @@ export default function DailyReport() {
                     {visibleEntries.map((entry) => (
                       <li
                         key={entry.id}
-                        className="py-2.5 flex items-start gap-3 group"
+                        className="py-2.5 px-1 flex items-start gap-3 group"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-2">
@@ -1236,7 +1243,7 @@ export default function DailyReport() {
                           onClick={() => handleRemoveEntry(entry.id)}
                           aria-label="Remove entry"
                           className={cn(
-                            "mt-0.5 shrink-0 rounded p-1 text-[#3c4657] hover:text-amber-300 transition-colors",
+                            "mt-0.5 shrink-0 rounded-lg p-1.5 text-[#3c4657] hover:text-amber-300 transition-colors",
                             focusRing,
                           )}
                         >
