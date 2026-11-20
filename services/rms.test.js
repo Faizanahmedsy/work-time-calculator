@@ -204,6 +204,27 @@ describe("RmsService", () => {
     });
   });
 
+  describe("fetchReportCounts", () => {
+    it("GETs reports-counts with the bearer token (pending + incomplete)", async () => {
+      global.fetch.mockResolvedValue(
+        jsonResponse({
+          success: true,
+          statusCode: 200,
+          message: "Report stats count fetched successfully",
+          data: { pendingCount: 1, incompleteCount: 2, holidayCount: 12 },
+        }),
+      );
+
+      const res = await RmsService.fetchReportCounts("tok");
+
+      const [url, init] = global.fetch.mock.calls[0];
+      expect(url).toContain("/daily-reports/reports-counts");
+      expect(init.method).toBe("GET");
+      expect(init.headers.authorization).toBe("Bearer tok");
+      expect(res.data.pendingCount + res.data.incompleteCount).toBe(3);
+    });
+  });
+
   describe("fetchPendingReportCount", () => {
     it("GETs the pending-count endpoint with the bearer token", async () => {
       global.fetch.mockResolvedValue(

@@ -12,6 +12,7 @@ import {
   getRmsAuthStateAction,
   getRmsDailyReportsAction,
   getRmsPendingReportCountAction,
+  getRmsReportCountsAction,
   createRmsDailyReportAction,
   getRmsMilestonesAction,
   getRmsProjectsAction,
@@ -131,9 +132,13 @@ export default function DailyReport() {
 
   // What RMS says is already logged, keyed by yyyy-MM-dd.
   const [loggedByDate, setLoggedByDate] = useState(null);
-  // RMS's own count of reports the user still owes. Authoritative: it accounts
-  // for approved leave and public holidays, which we cannot derive locally.
+  // RMS's own count of days the user still owes: days with no report
+  // (pending) PLUS days reported short of the shift (incomplete). Authoritative:
+  // it accounts for approved leave and public holidays, which we cannot derive
+  // locally. Counting only "pending" capped the list at the missing days and
+  // hid the short ones (20-11-2026: RMS 1 pending + 2 incomplete, we showed 1).
   const [pendingCount, setPendingCount] = useState(null);
+  const [rmsCounts, setRmsCounts] = useState(null);
 
   const selectedProject = useMemo(
     () => projects.find((p) => p.id === selectedProjectId) || null,
@@ -315,9 +320,19 @@ export default function DailyReport() {
       }));
       if (res?.success) setLoggedByDate(loggedMinutesByDate(res.data || []));
 
-      const countRes = logRms(await getRmsPendingReportCountAction());
-      if (countRes?.success && typeof countRes.data?.pendingCount === "number") {
-        setPendingCount(countRes.data.pendingCount);
+      const countsRes = logRms(await getRmsReportCountsAction());
+      const c = countsRes?.success ? countsRes.data : null;
+      if (c && typeof c.pendingCount === "number") {
+        const incomplete = typeof c.incompleteCount === "number" ? c.incompleteCount : 0;
+        setRmsCounts({ pending: c.pendingCount, incomplete });
+        setPendingCount(c.pendingCount + incomplete);
+      } else {
+        // Older RMS without reports-counts: missing days only.
+        const countRes = logRms(await getRmsPendingReportCountAction());
+        if (countRes?.success && typeof countRes.data?.pendingCount === "number") {
+          setRmsCounts(null);
+          setPendingCount(countRes.data.pendingCount);
+        }
       }
     } catch (err) {
       // Leave loggedByDate null so the backlog falls back to local drafts.
@@ -637,8 +652,11 @@ export default function DailyReport() {
                   say so rather than quietly showing a short list. */}
               {pendingCount !== null && pendingCount > pendingDays.length && (
                 <p className="mt-1.5 text-xs text-amber-300/70">
-                  RMS reports {pendingCount} pending — showing the{" "}
-                  {pendingDays.length} most recent.
+                  RMS reports{" "}
+                  {rmsCounts
+                    ? `${rmsCounts.pending} pending + ${rmsCounts.incomplete} incomplete`
+                    : `${pendingCount} pending`}{" "}
+                  — showing the {pendingDays.length} most recent.
                 </p>
               )}
             </div>

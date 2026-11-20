@@ -119,6 +119,25 @@ export async function getRmsMilestonesAction(projectId) {
   }
 }
 
+export async function getRmsReportCountsAction() {
+  const cookieStore = cookies();
+  const token = cookieStore.get("rms_auth_token")?.value;
+
+  if (!token) {
+    return { success: false, statusCode: 401, message: "Unauthorized" };
+  }
+
+  try {
+    return await RmsService.fetchReportCounts(token);
+  } catch (error) {
+    return {
+      success: false,
+      statusCode: 500,
+      message: error?.message || "Failed to fetch report counts.",
+    };
+  }
+}
+
 export async function getRmsPendingReportCountAction(options = {}) {
   const cookieStore = cookies();
   const token = cookieStore.get("rms_auth_token")?.value;

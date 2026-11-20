@@ -253,6 +253,17 @@ export const RmsService = {
   },
 
   /**
+   * The same counts RMS shows on its Daily Report page: pendingCount (days with
+   * no report at all), incompleteCount (days reported but short of the shift)
+   * and holidayCount. my-pending-report-count only has the first of these.
+   */
+  fetchReportCounts: async (token) =>
+    rmsFetch("/daily-reports/reports-counts", {
+      token,
+      label: "reports-counts",
+    }),
+
+  /**
    * Files a daily report against a task.
    *
    * Note the asymmetry with fetchDailyReports: writes take timeSpent as
